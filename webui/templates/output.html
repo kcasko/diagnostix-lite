@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>{{ title }} – DiagnostiX</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <script src="/static/output.js" defer></script>
+</head>
+
+<body>
+  <header class="dx-header">
+    <h1>DiagnostiX</h1>
+    <p class="dx-subtitle">TaurusTech Diagnostic Environment</p>
+  </header>
+
+  <main class="dx-main">
+    <h2>{{ title }}</h2>
+
+    <p class="dx-status">
+      Exit code:
+      {% if returncode == 0 %}
+        <span class="dx-status-ok">success</span>
+      {% else %}
+        <span class="dx-status-fail">error ({{ returncode }})</span>
+      {% endif %}
+    </p>
+
+    <div class="dx-output-box">
+      <pre>{{ output }}</pre>
+    </div>
+
+    <div class="dx-output-actions">
+      <a class="dx-btn" href="/">Back to Control Panel</a>
+      <a class="dx-btn-secondary" href="/download/{{ tool_id }}">Download Output</a>
+    </div>
+  </main>
+
+  <footer class="dx-footer">
+    DiagnostiX Lite v1.0
+  </footer>
+</body>
+</html>
+

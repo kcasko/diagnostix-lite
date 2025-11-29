@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Control Panel</h2>
+<p>Select a diagnostic tool to run.</p>
+
+<div id="loading" style="display:none; padding:15px; margin-bottom:20px; 
+     background:#111827; border:1px solid #1f2937; border-radius:8px; 
+     color:#cbd5e1; font-size:1.1rem;">
+  Running tool... stand by.
+</div>
+
+<div class="dx-grid">
+  {% for key, tool in tools.items() %}
+  <a class="dx-card" href="javascript:void(0)" onclick="runTool('/run/{{ key }}')">
+    <h3>{{ tool.label }}</h3>
+    <p>{{ tool.description }}</p>
+  </a>
+  {% endfor %}
+</div>
+
+<script>
+function runTool(endpoint) {
+    document.getElementById("loading").style.display = "block";
+    window.location.href = endpoint;
+}
+</script>
+
+{% endblock %}

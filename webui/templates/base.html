@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>{{ title or "DiagnostiX" }}</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="dx-header">
+  <img src="/static/banner.png" alt="DiagnostiX Banner" class="dx-banner">
+</header>
+
+  <main class="dx-main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="dx-footer">
+    DiagnostiX Lite · {{ title or "Control Panel" }}
+  </footer>
+</body>
+</html>

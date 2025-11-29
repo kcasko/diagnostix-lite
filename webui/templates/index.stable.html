@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Control Panel</h2>
+<p>Select a diagnostic tool to run.</p>
+
+<div class="dx-grid">
+  {% for key, tool in tools.items() %}
+  <a class="dx-card" href="/run/{{ key }}">
+    <h3>{{ tool.label }}</h3>
+    <p>{{ tool.description }}</p>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}
