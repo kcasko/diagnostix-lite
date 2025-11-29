@@ -135,7 +135,8 @@ Clone and run the builder:
 
     git clone https://github.com/pieroproietti/fresh-eggs
     cd fresh-eggs
-    sudo ./fresh-eggs.sh eggs love -n
+    sudo ./fresh-eggs.sh 
+    eggs love -n
 
 Your ISO will appear under:
 
