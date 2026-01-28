@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPTS="/opt/diagnostix/scripts"
-LOGS="/opt/diagnostix/logs"
+LOGS="./logs"
 
 mkdir -p "$LOGS"
 

@@ -60,7 +60,8 @@ def run() -> str:
                     raise FileNotFoundError("wmic failed")
             except (FileNotFoundError, subprocess.SubprocessError):
                 # Fallback to PowerShell (modern Windows)
-                ps_cmd = "Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion | Format-Table -AutoSize"
+                # Use Format-List to avoid column truncation
+                ps_cmd = "Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion | Format-List"
                 result = subprocess.run(
                     ["powershell", "-Command", ps_cmd],
                     capture_output=True,

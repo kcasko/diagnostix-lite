@@ -144,7 +144,8 @@ TOOLS: Dict[str, Dict[str, Any]] = {
         "script": "kraken_repo_scanner.sh",
         "description": "Scan system for Git repositories and integrity issues (Linux only).",
         "python_available": False,
-        "category": "developer"
+        "category": "developer",
+        "supported_platforms": ["Linux"]
     },
     "network_speed_test": {
         "label": "Network speed test",
@@ -158,29 +159,33 @@ TOOLS: Dict[str, Dict[str, Any]] = {
         "script": "quick_repair.sh",
         "description": "Common repair actions (Linux only).",
         "python_available": False,
-        "category": "repair"
+        "category": "repair",
+        "supported_platforms": ["Linux"]
     },
     "boot_diagnostics": {
         "label": "Boot diagnostics",
         "script": "boot_diagnostics.sh",
         "description": "UEFI/BIOS mode, fstab, and boot logs (Linux only).",
         "python_available": False,
-        "category": "system"
+        "category": "system",
+        "supported_platforms": ["Linux"]
     },
     "master_collect": {
         "label": "Full collection bundle",
         "script": "master_collect.sh",
         "description": "Gather logs and diagnostic info into a bundle (Linux only).",
         "python_available": False,
-        "category": "support"
+        "category": "support",
+        "supported_platforms": ["Linux"]
     },
     "tech_support_mode": {
         "label": "Tech Support Mode",
         "script": "tech_support_mode.sh",
         "description": "Run everything and create a full support bundle (Linux only).",
         "python_available": False,
-        "category": "support"
-    }
+        "category": "support",
+        "supported_platforms": ["Linux"]
+    },
 }
 
 
@@ -264,7 +269,14 @@ async def run_bash_diagnostic(tool_id: str, script_path: Path) -> Tuple[str, int
     try:
         # Select command based on OS
         if os.name == 'nt':  # Windows
-            cmd = ["bash", str(script_path)]
+            # Use relative path to avoid drive letter/colon issues in minimal bash shells
+            try:
+                # scripts is in CWD/scripts usually
+                rel_path = script_path.relative_to(Path.cwd())
+                cmd = ["bash", rel_path.as_posix()]
+            except ValueError:
+                # Fallback if on different drive (unlikely)
+                cmd = ["bash", script_path.as_posix()]
         else:  # Linux/Unix - Note: sudo may require password, consider using capabilities
             cmd = ["bash", str(script_path)]  # Removed sudo for security
 
@@ -355,11 +367,20 @@ def cleanup_temp_file(tool_id: str) -> None:
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     """Main dashboard page"""
+    # Filter tools based on platform
+    current_platform = platform.system()
+    available_tools = {}
+    
+    for tool_id, tool_data in TOOLS.items():
+        supported = tool_data.get("supported_platforms")
+        if supported is None or current_platform in supported:
+            available_tools[tool_id] = tool_data
+
     return templates.TemplateResponse(
         "index.html",
         {
             "request": request,
-            "tools": TOOLS,
+            "tools": available_tools,
             "title": "DiagnOStiX Control Panel",
             "python_available": PYTHON_DIAGNOSTICS_AVAILABLE
         }
@@ -369,10 +390,18 @@ async def index(request: Request):
 @app.get("/api/tools")
 async def list_tools():
     """API endpoint to list all available tools"""
+    current_platform = platform.system()
+    available_tools = {}
+    
+    for tool_id, tool_data in TOOLS.items():
+        supported = tool_data.get("supported_platforms")
+        if supported is None or current_platform in supported:
+            available_tools[tool_id] = tool_data
+
     return {
-        "tools": TOOLS,
+        "tools": available_tools,
         "python_diagnostics_available": PYTHON_DIAGNOSTICS_AVAILABLE,
-        "platform": platform.system()
+        "platform": current_platform
     }
 
 

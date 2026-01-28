@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOG_DIR="/opt/diagnostix/logs"
+LOG_DIR="./logs"
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/quickrepair_$(date +%Y-%m-%d_%H-%M-%S).log"
 

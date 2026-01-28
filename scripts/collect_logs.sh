@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASE_DIR="/opt/diagnostix/logs"
+BASE_DIR="./logs"
 TS="$(date +'%Y%m%d_%H%M%S')"
 BUNDLE_DIR="${BASE_DIR}/bundle_${TS}"
 

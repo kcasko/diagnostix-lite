@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOG_DIR="/opt/diagnostix/logs"
+LOG_DIR="./logs"
 SCRIPTS_DIR="/opt/diagnostix/scripts"
 
 mkdir -p "$LOG_DIR"
