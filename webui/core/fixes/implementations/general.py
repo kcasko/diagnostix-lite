@@ -4,8 +4,8 @@ import platform
 import subprocess
 import glob
 from pathlib import Path
-from ..base import Fix, FixResult
-from ..registry import FixRegistry
+from core.fixes.base import Fix, FixResult
+from core.fixes.registry import FixRegistry
 
 class ClearTempFilesFix(Fix):
     def __init__(self):

@@ -13,7 +13,7 @@ run_if_exists() {
 
 while true; do
   clear
-  echo "=== DiagnostiX Lite Menu ==="
+  echo "=== DiagnOStiX Menu ==="
   echo
   echo "1) System overview"
   echo "2) Hardware health"

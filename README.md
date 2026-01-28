@@ -55,7 +55,7 @@ Started November 2025.
 
 ## Repository Structure
 
-    diagnostix-lite
+    diagnostix
     ├── branding
     │   ├── banner.png
     │   ├── icon.png
@@ -122,8 +122,8 @@ Started November 2025.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/diagnostix-lite-1
-cd diagnostix-lite-1
+git clone https://github.com/yourusername/diagnostix
+cd diagnostix
 
 # Start with Docker Compose
 docker compose up
@@ -246,7 +246,7 @@ ISO will appear in `/home/eggs/`
 ### Project Structure
 
 ```
-diagnostix-lite/
+diagnostix/
 ├── docker-compose.yml      # Docker orchestration (root level)
 ├── branding/              # Visual assets (logos, wallpapers)
 ├── scripts/               # Bash diagnostic scripts (Linux)

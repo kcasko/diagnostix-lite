@@ -1,7 +1,7 @@
 import psutil
 from typing import Dict, Any
-from ..base import Fix
-from ..registry import FixRegistry
+from core.fixes.base import Fix
+from core.fixes.registry import FixRegistry
 
 class TerminateRunawayProcessFix(Fix):
     def __init__(self):

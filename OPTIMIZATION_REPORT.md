@@ -359,7 +359,7 @@ except psutil.AccessDenied:
 5. **Or use Docker:**
    ```bash
    # Use optimized Dockerfile
-   docker build -f Dockerfile.optimized -t diagnostix-lite:optimized .
+   docker build -f Dockerfile.optimized -t diagnostix:optimized .
    docker compose -f docker-compose.optimized.yml up
    ```
 

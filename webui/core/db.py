@@ -83,7 +83,7 @@ class Database:
             
             with self.conn:
                 self.conn.execute(query, (
-                    datetime.now(),
+                    datetime.now().isoformat(),
                     hostname,
                     os_name,
                     fix_id,

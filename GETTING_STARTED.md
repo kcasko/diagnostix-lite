@@ -53,7 +53,7 @@ You should see the DiagnOStiX Control Panel with all the diagnostic tools listed
 ## Project Structure
 
 ```
-diagnostix-lite/
+diagnostix/
 ├── branding/          # Branding assets (wallpapers, icons, banners)
 ├── scripts/           # Bash diagnostic scripts
 ├── webui/             # FastAPI web interface

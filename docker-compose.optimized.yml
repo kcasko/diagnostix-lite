@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.optimized
-    container_name: diagnostix-lite
+    container_name: diagnostix
     ports:
       - "8000:8000"
     volumes:
@@ -28,7 +28,7 @@ services:
           memory: 256M
     # Health check
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
       timeout: 5s
       retries: 3

@@ -1,5 +1,5 @@
 from typing import Dict, List, Type
-from .base import Fix
+from core.fixes.base import Fix
 import logging
 
 logger = logging.getLogger(__name__)

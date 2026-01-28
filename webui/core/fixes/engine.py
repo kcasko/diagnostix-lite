@@ -3,9 +3,9 @@ import logging
 import traceback
 from typing import Dict, Any, Optional
 
-from .registry import FixRegistry
-from .base import FixResult
-from ..db import db_instance
+from core.fixes.registry import FixRegistry
+from core.fixes.base import FixResult
+from core.db import db_instance
 
 logger = logging.getLogger(__name__)
 

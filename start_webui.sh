@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Starting DiagnostiX Lite WebUI..."
+echo "Starting DiagnOStiX WebUI..."
 echo
 cd webui
 echo "Activating virtual environment..."

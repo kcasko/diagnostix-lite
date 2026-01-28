@@ -46,13 +46,28 @@ def run() -> str:
     output.append("--- System GPU Information ---")
     try:
         if platform.system() == "Windows":
-            result = subprocess.run(
-                ["wmic", "path", "win32_VideoController", "get", "name,driverversion"],
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-            output.append(result.stdout)
+            # Try wmic first (deprecated but common)
+            try:
+                result = subprocess.run(
+                    ["wmic", "path", "win32_VideoController", "get", "name,driverversion"],
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                if result.returncode == 0:
+                    output.append(result.stdout)
+                else:
+                    raise FileNotFoundError("wmic failed")
+            except (FileNotFoundError, subprocess.SubprocessError):
+                # Fallback to PowerShell (modern Windows)
+                ps_cmd = "Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion | Format-Table -AutoSize"
+                result = subprocess.run(
+                    ["powershell", "-Command", ps_cmd],
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                output.append(result.stdout)
         elif platform.system() == "Linux":
             try:
                 result = subprocess.run(

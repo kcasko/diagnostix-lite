@@ -8,8 +8,8 @@ Get DiagnOStiX running in under 5 minutes!
 
 ```bash
 # Clone the repo
-git clone https://github.com/yourusername/diagnostix-lite-1
-cd diagnostix-lite-1
+git clone https://github.com/yourusername/diagnostix
+cd diagnostix
 
 # Start the container
 docker compose up
@@ -36,8 +36,8 @@ docker compose down
 
 ```bash
 # Clone the repo
-git clone https://github.com/yourusername/diagnostix-lite-1
-cd diagnostix-lite-1/webui
+git clone https://github.com/yourusername/diagnostix
+cd diagnostix/webui
 
 # Install dependencies
 pip install -r requirements.txt
@@ -111,7 +111,7 @@ pip install -r requirements.txt
 
 ## Support
 
-- GitHub Issues: https://github.com/yourusername/diagnostix-lite-1/issues
+- GitHub Issues: https://github.com/yourusername/diagnostix/issues
 - Documentation: [README.md](README.md)
 
 ---

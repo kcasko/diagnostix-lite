@@ -5,9 +5,9 @@ from typing import Dict, List, Any, Optional
 from pydantic import BaseModel
 from pathlib import Path
 
-from ..core.fixes.registry import FixRegistry
-from ..core.fixes.engine import FixEngine
-from ..core.db import db_instance
+from core.fixes.registry import FixRegistry
+from core.fixes.engine import FixEngine
+from core.db import db_instance
 
 # Setup Templates (mirroring main.py logic for now)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,6 +36,11 @@ async def list_fixes():
             result.append(info)
     return result
 
+@router.get("/history")
+async def get_fix_history():
+    """Get audit log history."""
+    return db_instance.get_history()
+
 @router.get("/{fix_id}")
 async def get_fix_details(fix_id: str):
     """Get details for a specific fix."""
@@ -62,7 +67,4 @@ async def run_fix(fix_id: str, request: RunFixRequest, background_tasks: Backgro
     result = FixEngine.run_fix(fix_id)
     return result
 
-@router.get("/history")
-async def get_fix_history():
-    """Get audit log history."""
-    return db_instance.get_history()
+

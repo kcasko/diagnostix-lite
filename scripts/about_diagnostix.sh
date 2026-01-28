@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "=== DiagnostiX Lite ==="
+echo "=== DiagnOStiX ==="
 echo "Version: 0.1 Alpha"
 echo "Built on: Ubuntu 24.04"
 echo "Developer: TaurusTech"

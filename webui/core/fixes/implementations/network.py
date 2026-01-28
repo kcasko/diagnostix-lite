@@ -1,7 +1,7 @@
 import platform
 import subprocess
-from ..base import Fix, FixResult
-from ..registry import FixRegistry
+from core.fixes.base import Fix, FixResult
+from core.fixes.registry import FixRegistry
 
 class RestartNetworkServicesFix(Fix):
     def __init__(self):

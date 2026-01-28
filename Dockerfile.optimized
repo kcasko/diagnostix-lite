@@ -1,4 +1,4 @@
-# DiagnostiX Lite - Optimized Multi-stage Docker Build
+# DiagnOStiX - Optimized Multi-stage Docker Build
 # Stage 1: Base image with dependencies
 FROM python:3.12-slim as base
 

@@ -50,7 +50,7 @@ def run() -> str:
     output.append("")
     
     output.append("Repository:")
-    output.append("  https://github.com/yourusername/diagnostix-lite")
+    output.append("  https://github.com/yourusername/diagnostix")
     output.append("")
     
     output.append("=" * 60)

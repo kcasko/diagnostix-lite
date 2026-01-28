@@ -2,7 +2,7 @@
 
 set -e
 
-echo "=== DiagnostiX Lite AutoBranding ==="
+echo "=== DiagnOStiX AutoBranding ==="
 
 BRAND_DIR="/opt/diagnostix/branding"
 WALL_DIR="$BRAND_DIR/wallpapers"
@@ -27,27 +27,27 @@ echo "Copying boot image to Plymouth theme..."
 sudo cp "$BOOT_IMG" "$PLYMOUTH_THEME/boot.png"
 
 echo "Writing Plymouth descriptor..."
-sudo tee "$PLYMOUTH_THEME/diagnostix-lite.plymouth" > /dev/null <<EOF
+sudo tee "$PLYMOUTH_THEME/diagnostix.plymouth" > /dev/null <<EOF
 [Plymouth Theme]
-Name=DiagnostiX Lite
+Name=DiagnostiX
 Description=DiagnostiX Neon Boot
 ModuleName=script
 
 [script]
 ImageDir=/usr/share/plymouth/themes/diagnostix
-ScriptFile=/usr/share/plymouth/themes/diagnostix/diagnostix-lite.script
+ScriptFile=/usr/share/plymouth/themes/diagnostix/diagnostix.script
 EOF
 
 echo "Writing Plymouth script..."
-sudo tee "$PLYMOUTH_THEME/diagnostix-lite.script" > /dev/null <<EOF
+sudo tee "$PLYMOUTH_THEME/diagnostix.script" > /dev/null <<EOF
 wallpaper_image = Image("boot.png");
 wallpaper_sprite = Sprite(wallpaper_image);
 wallpaper_sprite.SetZ(-100);
 EOF
 
 echo "Registering Plymouth theme..."
-sudo update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth "$PLYMOUTH_THEME/diagnostix-lite.plymouth" 100
-sudo update-alternatives --set default.plymouth "$PLYMOUTH_THEME/diagnostix-lite.plymouth"
+sudo update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth "$PLYMOUTH_THEME/diagnostix.plymouth" 100
+sudo update-alternatives --set default.plymouth "$PLYMOUTH_THEME/diagnostix.plymouth"
 
 echo "Updating initramfs..."
 sudo update-initramfs -u
