@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  diagnostix:
+    build:
+      context: .
+      dockerfile: Dockerfile.optimized
+    container_name: diagnostix-lite
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount scripts for easy development (read-only for security)
+      - ./scripts:/app/scripts:ro
+      # Persist logs and output
+      - diagnostix-temp:/tmp
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    # Add capabilities for network diagnostics only
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    cap_drop:
+      - ALL
+
+volumes:
+  diagnostix-temp:
+    driver: local
+
+networks:
+  default:
+    name: diagnostix-network

@@ -1,0 +1,19 @@
+# DiagnOStiX - Python Dependencies
+# Core web framework
+fastapi>=0.128.0
+uvicorn[standard]>=0.40.0
+jinja2>=3.1.6
+python-multipart>=0.0.22
+
+# System diagnostics (cross-platform)
+psutil>=6.1.1
+py-cpuinfo>=9.0.0
+
+# GPU diagnostics (optional, NVIDIA only)
+gputil>=1.4.0
+
+# Network speed testing
+speedtest-cli>=2.1.3
+
+# Type hints
+typing-extensions>=4.12.2

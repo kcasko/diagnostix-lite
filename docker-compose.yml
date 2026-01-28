@@ -1,0 +1,30 @@
+services:
+  diagnostix:
+    build:
+      context: ./webui
+      dockerfile: Dockerfile
+    container_name: diagnostix
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount diagnostics module for live development
+      - ./webui/diagnostics:/app/diagnostics
+      # Persist logs
+      - ./logs:/app/logs
+      # Mount scripts folder (for fallback bash scripts if needed)
+      - ./scripts:/app/scripts:ro
+      # Mount static assets
+      - ./webui/static:/app/static
+      - ./webui/templates:/app/templates
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  logs:
