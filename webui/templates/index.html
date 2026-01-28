@@ -3,10 +3,18 @@
 <h2>Control Panel</h2>
 <p>Select a diagnostic tool to run.</p>
 
+
 <div id="loading" style="display:none; padding:15px; margin-bottom:20px; 
      background:#111827; border:1px solid #1f2937; border-radius:8px; 
      color:#cbd5e1; font-size:1.1rem;">
   Running tool... stand by.
+</div>
+
+<div style="margin-bottom: 2rem;">
+  <a href="/fixes/"
+    style="display:inline-block; padding:10px 20px; background:#2563eb; color:white; text-decoration:none; border-radius:8px; font-weight:bold;">
+    Open Fix Engine Dashboard &rarr;
+  </a>
 </div>
 
 <div class="dx-grid">
@@ -19,10 +27,10 @@
 </div>
 
 <script>
-function runTool(endpoint) {
+  function runTool(endpoint) {
     document.getElementById("loading").style.display = "block";
     window.location.href = endpoint;
-}
+  }
 </script>
 
 {% endblock %}

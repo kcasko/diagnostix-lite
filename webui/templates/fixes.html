@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>System Fixes & Repairs</h2>
+<p>Safe, audited repairs for common system issues.</p>
+
+<div id="status-message" style="display:none; padding:15px; margin-bottom:20px; border-radius:8px;"></div>
+
+<!-- Fixes Grid -->
+<div class="dx-grid" id="fixes-grid">
+    <!-- Populated by JS -->
+    <div class="dx-card loading-card">Loading available fixes...</div>
+</div>
+
+<!-- History Section -->
+<h3 style="margin-top: 40px;">Execution History</h3>
+<div style="overflow-x:auto;">
+    <table class="dx-table" id="history-table" style="width:100%; text-align:left; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid #333;">
+                <th style="padding:10px;">Time</th>
+                <th style="padding:10px;">Fix</th>
+                <th style="padding:10px;">Result</th>
+                <th style="padding:10px;">Details</th>
+            </tr>
+        </thead>
+        <tbody id="history-body">
+            <!-- Populated by JS -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal for Confirmation/Running -->
+<div id="fix-modal" class="dx-modal"
+    style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
+    <div class="dx-modal-content"
+        style="background:#1f2937; padding:2rem; border-radius:12px; max-width:500px; width:90%; color:#fff;">
+        <h3 id="modal-title" style="margin-top:0;">Fix Title</h3>
+        <p id="modal-desc" style="color:#cbd5e1;"></p>
+
+        <div style="background:#111827; padding:1rem; border-radius:6px; margin:1rem 0;">
+            <strong>Preview:</strong>
+            <pre id="modal-preview"
+                style="white-space:pre-wrap; margin:0.5rem 0 0 0; color:#4ade80; font-family:monospace;"></pre>
+        </div>
+
+        <div id="modal-input-area" style="display:none; margin-bottom:1rem;">
+            <label for="modal-input" style="display:block; margin-bottom:0.5rem;">Required Input (e.g., PID):</label>
+            <input type="text" id="modal-input"
+                style="width:100%; padding:8px; border-radius:4px; border:1px solid #4b5563; background:#374151; color:#fff;">
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1.5rem;">
+            <button onclick="closeModal()"
+                style="padding:8px 16px; background:transparent; border:1px solid #4b5563; color:#fff; border-radius:6px; cursor:pointer;">Cancel</button>
+            <button id="btn-confirm-run"
+                style="padding:8px 16px; background:#ef4444; border:none; color:#fff; border-radius:6px; cursor:pointer; font-weight:bold;">Execute
+                Fix</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        loadFixes();
+        loadHistory();
+    });
+
+    async function loadFixes() {
+        const grid = document.getElementById('fixes-grid');
+        try {
+            const res = await fetch('/fixes/api');
+            const fixes = await res.json();
+
+            grid.innerHTML = '';
+            fixes.forEach(fix => {
+                const card = document.createElement('div');
+                card.className = 'dx-card';
+                card.style.cursor = 'default';
+
+                // Risk Badge
+                const riskColor = fix.risk === 'Safe' ? '#22c55e' : '#f59e0b';
+
+                card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:start;">
+                    <h3>${fix.name}</h3>
+                    <span style="background:${riskColor}20; color:${riskColor}; padding:2px 8px; border-radius:12px; font-size:0.75rem; border:1px solid ${riskColor}">${fix.risk}</span>
+                </div>
+                <p>${fix.description}</p>
+                <div style="margin-top:1rem; display:flex; gap:10px;">
+                    <button onclick="openFixModal('${fix.id}')" style="background:#2563eb; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">
+                        ${fix.is_needed ? 'Fix Needed' : 'Run...'}
+                    </button>
+                </div>
+            `;
+                grid.appendChild(card);
+            });
+        } catch (e) {
+            grid.innerHTML = '<p style="color:red">Failed to load fixes.</p>';
+        }
+    }
+
+    async function loadHistory() {
+        const tbody = document.getElementById('history-body');
+        try {
+            const res = await fetch('/fixes/history');
+            const history = await res.json();
+
+            tbody.innerHTML = '';
+            if (history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="padding:10px; text-align:center; color:#6b7280;">No execution history yet.</td></tr>';
+                return;
+            }
+
+            history.forEach(entry => {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid #374151';
+
+                const statusColor = entry.result === 'success' ? '#4ade80' : '#ef4444';
+                const date = new Date(entry.timestamp).toLocaleString();
+
+                tr.innerHTML = `
+                <td style="padding:10px;">${date}</td>
+                <td style="padding:10px;">${entry.fix_id}</td>
+                <td style="padding:10px; color:${statusColor}; font-weight:bold;">${entry.result}</td>
+                <td style="padding:10px;">${entry.error_message || 'Success'}</td>
+            `;
+                tbody.appendChild(tr);
+            });
+        } catch (e) {
+            console.error("Failed to load history", e);
+        }
+    }
+
+    let currentFixId = null;
+
+    async function openFixModal(fixId) {
+        currentFixId = fixId;
+        const modal = document.getElementById('fix-modal');
+        modal.style.display = 'flex';
+
+        // Reset contents
+        document.getElementById('modal-title').innerText = 'Loading...';
+        document.getElementById('modal-desc').innerText = '';
+        document.getElementById('modal-preview').innerText = 'Fetching details...';
+        document.getElementById('modal-input-area').style.display = 'none';
+        document.getElementById('modal-input').value = '';
+
+        // Fetch fresh details
+        try {
+            const res = await fetch(`/fixes/${fixId}`);
+            const info = await res.json();
+
+            document.getElementById('modal-title').innerText = info.name;
+            document.getElementById('modal-desc').innerText = info.description;
+            document.getElementById('modal-preview').innerText = info.preview;
+
+            if (fixId === 'terminate_process') {
+                document.getElementById('modal-input-area').style.display = 'block';
+            }
+
+        } catch (e) {
+            document.getElementById('modal-preview').innerText = "Error fetching fix details.";
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('fix-modal').style.display = 'none';
+        currentFixId = null;
+    }
+
+    document.getElementById('btn-confirm-run').onclick = async () => {
+        if (!currentFixId) return;
+
+        const btn = document.getElementById('btn-confirm-run');
+        const originalText = btn.innerText;
+        btn.innerText = "Executing...";
+        btn.disabled = true;
+
+        const inputVal = document.getElementById('modal-input').value;
+        const payload = { params: {} };
+        if (inputVal) {
+            payload.params.pid = inputVal;
+        }
+
+        try {
+            const res = await fetch(`/fixes/${currentFixId}/run`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+
+            closeModal();
+
+            // Show status
+            const statusEl = document.getElementById('status-message');
+            statusEl.style.display = 'block';
+            if (result.success) {
+                statusEl.style.background = '#064e3b';
+                statusEl.style.border = '1px solid #059669';
+                statusEl.style.color = '#a7f3d0';
+                statusEl.innerText = `Success: ${result.message}`;
+            } else {
+                statusEl.style.background = '#450a0a';
+                statusEl.style.border = '1px solid #dc2626';
+                statusEl.style.color = '#fca5a5';
+                statusEl.innerText = `Failed: ${result.message}`;
+            }
+
+            // Refresh history
+            loadHistory();
+            loadFixes(); // Re-detect
+
+        } catch (e) {
+            alert("Execution failed to start: " + e);
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    };
+</script>
+{% endblock %}

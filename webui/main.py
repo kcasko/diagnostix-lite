@@ -17,6 +17,15 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.background import BackgroundTask
 
+# Fix Engine Imports
+from core.db import db_instance
+from core.fixes.registry import FixRegistry
+# Check if internal modules must be imported to trigger registration
+import core.fixes.implementations.general
+import core.fixes.implementations.network
+import core.fixes.implementations.process
+from routers.fixes import router as fixes_router
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -43,6 +52,14 @@ async def lifespan(app: FastAPI):
     """Lifecycle manager for application startup and shutdown"""
     logger.info(f"Starting DiagnOStiX v{app.version}")
     logger.info(f"Python diagnostics available: {PYTHON_DIAGNOSTICS_AVAILABLE}")
+    
+    # Initialize Database
+    try:
+        db_instance.connect()
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize database: {e}")
+        
     yield
     logger.info("Shutting down DiagnOStiX")
 
@@ -176,6 +193,9 @@ app.mount(
     StaticFiles(directory=str(STATIC_DIR)),
     name="static"
 )
+
+# Mount Routers
+app.include_router(fixes_router)
 
 
 # Helper functions
