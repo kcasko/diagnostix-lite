@@ -29,15 +29,10 @@ class DisableBloatServicesFix(Fix):
 
     def preview(self) -> str:
         return (
-            "Will disable the following services:
-"
-            "- DiagTrack (Diagnostic Tracking / Telemetry)
-"
-            "- MapsBroker (Downloaded Maps Manager)
-"
-            "- RetailDemo (Retail Demo Service)
-
-"
+            "Will disable the following services:\n"
+            "- DiagTrack (Diagnostic Tracking / Telemetry)\n"
+            "- MapsBroker (Downloaded Maps Manager)\n"
+            "- RetailDemo (Retail Demo Service)\n\n"
             "These services are safe to disable and will improve performance."
         )
 
@@ -73,15 +68,10 @@ class PowerPerformanceFix(Fix):
 
     def preview(self) -> str:
         return (
-            "Will configure power settings:
-"
-            "- Set maximum CPU throttle to 100%
-"
-            "- Set minimum CPU throttle to 5%
-"
-            "- Activate current power scheme
-
-"
+            "Will configure power settings:\n"
+            "- Set maximum CPU throttle to 100%\n"
+            "- Set minimum CPU throttle to 5%\n"
+            "- Activate current power scheme\n\n"
             "Note: This increases power consumption and heat. Best for desktops."
         )
 

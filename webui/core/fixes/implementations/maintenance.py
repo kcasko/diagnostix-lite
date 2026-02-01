@@ -40,15 +40,10 @@ class CleanTempAdvancedFix(Fix):
         update_cache = Path("C:/Windows/SoftwareDistribution/Download")
         
         return (
-            "Will clean the following locations:
-"
-            f"- User temp: {temp_dir}
-"
-            f"- Windows temp: {win_temp}
-"
-            f"- Windows Update cache: {update_cache}
-
-"
+            "Will clean the following locations:\n"
+            f"- User temp: {temp_dir}\n"
+            f"- Windows temp: {win_temp}\n"
+            f"- Windows Update cache: {update_cache}\n\n"
             "Locked files will be skipped safely."
         )
 

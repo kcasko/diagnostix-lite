@@ -1,3 +1,5 @@
+import html
+
 from fastapi.testclient import TestClient
 from main import app
 
@@ -14,4 +16,4 @@ def test_simple_mode_start():
     client = TestClient(app)
     response = client.get("/simple")
     assert response.status_code == 200
-    assert "What's wrong?" in response.text
+    assert "What's wrong?" in html.unescape(response.text)

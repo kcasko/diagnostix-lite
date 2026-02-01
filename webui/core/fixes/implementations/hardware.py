@@ -30,14 +30,9 @@ class RAMTestFix(Fix):
 
     def preview(self) -> str:
         return (
-            "Will launch Windows Memory Diagnostic (mdsched.exe).
-
-"
-            "IMPORTANT: This will schedule a memory test and restart your computer!
-"
-            "The test runs before Windows loads and can take 10-30 minutes.
-
-"
+            "Will launch Windows Memory Diagnostic (mdsched.exe).\n\n"
+            "IMPORTANT: This will schedule a memory test and restart your computer!\n"
+            "The test runs before Windows loads and can take 10-30 minutes.\n\n"
             "Results will be available in Event Viewer after the test completes."
         )
 

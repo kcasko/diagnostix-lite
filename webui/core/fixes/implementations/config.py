@@ -30,13 +30,9 @@ class RestoreContextMenuFix(Fix):
 
     def preview(self) -> str:
         return (
-            "Will modify registry to restore classic context menu:
-"
-            "- Disables Windows 11 simplified right-click menu
-"
-            "- Shows all options directly without 'Show more options'
-
-"
+            "Will modify registry to restore classic context menu:\n"
+            "- Disables Windows 11 simplified right-click menu\n"
+            "- Shows all options directly without 'Show more options'\n\n"
             "Requires Explorer restart or reboot to take effect."
         )
 
@@ -69,13 +65,9 @@ class DisableBingSearchFix(Fix):
 
     def preview(self) -> str:
         return (
-            "Will disable Bing search integration:
-"
-            "- BingSearchEnabled = 0
-"
-            "- SearchboxTaskbarMode = 0
-
-"
+            "Will disable Bing search integration:\n"
+            "- BingSearchEnabled = 0\n"
+            "- SearchboxTaskbarMode = 0\n\n"
             "Start menu search will only show local results."
         )
 
@@ -108,11 +100,8 @@ class EnableLongPathsFix(Fix):
 
     def preview(self) -> str:
         return (
-            "Will enable long path support:
-"
-            "- LongPathsEnabled = 1 (in HKLM)
-
-"
+            "Will enable long path support:\n"
+            "- LongPathsEnabled = 1 (in HKLM)\n\n"
             "Required for modern development tools (Git, Node.js, etc.)."
         )
 

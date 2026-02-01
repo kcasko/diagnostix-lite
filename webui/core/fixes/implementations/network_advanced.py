@@ -30,24 +30,14 @@ class NetworkFullResetFix(Fix):
 
     def preview(self) -> str:
         return (
-            "WARNING: This is a comprehensive network reset!
-
-"
-            "Will execute:
-"
-            "- ipconfig /flushdns (clear DNS cache)
-"
-            "- netsh winsock reset (reset TCP/IP stack)
-"
-            "- netsh int ip reset (reset IP configuration)
-"
-            "- netsh advfirewall reset (reset firewall to defaults)
-"
-            "- ipconfig /release and /renew (refresh DHCP)
-
-"
-            "CAUTION: Custom firewall rules will be lost!
-"
+            "WARNING: This is a comprehensive network reset!\n\n"
+            "Will execute:\n"
+            "- ipconfig /flushdns (clear DNS cache)\n"
+            "- netsh winsock reset (reset TCP/IP stack)\n"
+            "- netsh int ip reset (reset IP configuration)\n"
+            "- netsh advfirewall reset (reset firewall to defaults)\n"
+            "- ipconfig /release and /renew (refresh DHCP)\n\n"
+            "CAUTION: Custom firewall rules will be lost!\n"
             "A reboot is recommended after this operation."
         )
 
