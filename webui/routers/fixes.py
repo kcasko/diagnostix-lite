@@ -23,7 +23,7 @@ class RunFixRequest(BaseModel):
 @router.get("/", response_class=HTMLResponse)
 async def fixes_dashboard(request: Request):
     """Render the Fixes Dashboard."""
-    return templates.TemplateResponse("fixes.html", {"request": request, "title": "Fixes & Repairs"})
+    return templates.TemplateResponse(request, "fixes.html", {"title": "Fixes & Repairs"})
 
 @router.get("/api")
 async def list_fixes():

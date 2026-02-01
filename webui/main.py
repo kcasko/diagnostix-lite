@@ -384,9 +384,9 @@ async def index(request: Request):
             available_tools[tool_id] = tool_data
 
     return templates.TemplateResponse(
+        request,
         "index.html",
         {
-            "request": request,
             "tools": available_tools,
             "title": "DiagnOStiX Control Panel",
             "python_available": PYTHON_DIAGNOSTICS_AVAILABLE
@@ -416,7 +416,7 @@ async def list_tools():
 async def run_tool(
     tool_id: str,
     request: Request,
-    mode: str = Query("auto", regex="^(auto|python|bash)$")
+    mode: str = Query("auto", pattern="^(auto|python|bash)$")
 ):
     """
     Execute a diagnostic tool
@@ -461,9 +461,9 @@ async def run_tool(
     save_output_to_temp(tool_id, output)
 
     return templates.TemplateResponse(
+        request,
         "output.html",
         {
-            "request": request,
             "title": tool["label"],
             "tool": tool,
             "tool_id": tool_id,

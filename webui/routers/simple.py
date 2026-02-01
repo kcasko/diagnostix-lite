@@ -171,9 +171,9 @@ def _issue_label(issue_id: str) -> str:
 async def simple_step1(request: Request):
     _reset_wizard_state(request)
     return templates.TemplateResponse(
+        request,
         "simple/step1.html",
         {
-            "request": request,
             "title": "Simple Mode",
             "options": ISSUE_OPTIONS,
         },
@@ -196,9 +196,9 @@ async def simple_step2(request: Request):
         return RedirectResponse("/simple", status_code=303)
     selected = request.session.get("simple_risk", "safe")
     return templates.TemplateResponse(
+        request,
         "simple/step2.html",
         {
-            "request": request,
             "title": "Simple Mode",
             "selected": selected,
             "issue_label": _issue_label(issue),
@@ -218,9 +218,9 @@ async def simple_step2_submit(
     if risk == "moderate" and confirm != "yes":
         request.session["simple_risk"] = risk
         return templates.TemplateResponse(
+            request,
             "simple/step2.html",
             {
-                "request": request,
                 "title": "Simple Mode",
                 "selected": risk,
                 "issue_label": _issue_label(request.session.get("simple_issue", "")),
@@ -241,9 +241,9 @@ async def simple_step3(request: Request):
     request.session["simple_plan"] = plan
     actions = [_action_label_for(fix_id) for fix_id in plan]
     return templates.TemplateResponse(
+        request,
         "simple/step3.html",
         {
-            "request": request,
             "title": "Simple Mode",
             "issue_label": _issue_label(issue),
             "risk": risk,
@@ -282,9 +282,9 @@ async def simple_run(request: Request):
     if not state or not state.get("queue"):
         return RedirectResponse("/simple/results", status_code=303)
     return templates.TemplateResponse(
+        request,
         "simple/run.html",
         {
-            "request": request,
             "title": "Simple Mode",
             "actions": state.get("labels", []),
             "total": len(state.get("queue", [])),
@@ -354,9 +354,9 @@ async def simple_results(request: Request):
     show_pro_mode = len(failed) > 0 or total == 0
 
     return templates.TemplateResponse(
+        request,
         "simple/results.html",
         {
-            "request": request,
             "title": "Simple Mode",
             "completed": completed,
             "failed": failed,
