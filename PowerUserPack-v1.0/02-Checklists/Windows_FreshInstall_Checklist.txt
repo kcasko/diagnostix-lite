@@ -1,0 +1,32 @@
+Windows Fresh Install Checklist
+
+Pre-Install:
+• Backup important files
+• Confirm Windows ISO version
+• Verify product key or activation status
+• Disconnect unnecessary USB devices
+
+Post-Install Essentials:
+• Install chipset, GPU, LAN, WiFi drivers
+• Run Windows Update until it stops complaining
+• Remove bloat apps from Start Menu
+• Configure privacy settings (telemetry off, ads off)
+
+System Tweaks:
+• Set power plan to High Performance
+• Disable startup junk
+• Configure restore points
+• Install monitoring tools (HWInfo, CrystalDiskInfo)
+
+Security:
+• Enable BitLocker (if applicable)
+• Configure Defender settings
+• Firewall set to block inbound by default
+
+Apps to Install:
+• Browser
+• Password manager
+• Steam/Launcher stack
+• Dev tools (VS Code, WSL, Git, Python)
+
+Done.

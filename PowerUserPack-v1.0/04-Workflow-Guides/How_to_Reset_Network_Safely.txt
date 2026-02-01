@@ -1,0 +1,20 @@
+How to Reset Your Network (TaurusTech Method)
+
+Run TaurusTech Network Reset from the Command Center
+
+Reboot the PC
+
+Power-cycle your modem/router
+
+Verify IP renewal with ipconfig /renew
+
+Check IPv6 status (optional)
+
+Test DNS with:
+nslookup google.com
+
+Test LAN speed
+
+Test WAN speed
+
+If issues remain, flush ARP cache and disable/enable the adapter.

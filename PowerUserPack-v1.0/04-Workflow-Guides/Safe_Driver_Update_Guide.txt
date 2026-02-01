@@ -1,0 +1,15 @@
+Safe Driver Update Procedure
+
+Create a system restore point
+
+Update GPU using NVIDIA/AMD official installer
+
+Update chipset (Intel or AMD)
+
+Update WiFi/LAN drivers
+
+Reboot
+
+Test system stability
+
+Avoid 3rd-party “driver updater” trash software.

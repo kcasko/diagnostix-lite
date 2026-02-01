@@ -1,0 +1,9 @@
+Monthly Maintenance Checklist
+
+• Run TaurusTech temp cleaner
+• Take a system snapshot using system_info_snapshot.bat
+• Update GPU drivers
+• Update WSL packages
+• Clean startup entries
+• Trim SSDs and check drive health
+• Reboot router

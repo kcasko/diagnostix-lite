@@ -1,0 +1,8 @@
+Daily Maintenance Checklist
+
+• Restart your system once (fixes half of life’s problems)
+• Check temps if gaming or doing heavy loads
+• Clear clutter from Downloads
+• Sync cloud drives
+• Verify backups ran overnight
+• Ensure Windows Update didn’t break anything

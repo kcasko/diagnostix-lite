@@ -1,0 +1,16 @@
+Identifying Spyware or Bloat on Windows
+
+Check startup entries:
+• Run TaurusTech Startup Manager
+• Remove unknown vendor entries
+
+Check services:
+• Disable DiagTrack
+• Verify no “assistant”, “optimizer”, or “booster” apps
+
+Check scheduled tasks:
+• Look for Adobe/Google updaters
+• Kill any OEM spyware like “ASUS Update Checker”
+
+Check installed apps:
+• Remove OEM control panels (HP, Dell, Lenovo) if not needed
