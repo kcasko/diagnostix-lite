@@ -6,6 +6,34 @@
 
 <div id="status-message" style="display:none; padding:15px; margin-bottom:20px; border-radius:8px;"></div>
 
+<style>
+    .dx-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin: 1rem 0 1.5rem;
+    }
+
+    .dx-tab {
+        padding: 0.4rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid #374151;
+        background: #0f172a;
+        color: #cbd5f5;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .dx-tab.active {
+        border-color: #60a5fa;
+        color: #ffffff;
+        box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.4);
+    }
+</style>
+
+<div id="category-tabs" class="dx-tabs"></div>
+
 <!-- Fixes Grid -->
 <div class="dx-grid" id="fixes-grid">
     <!-- Populated by JS -->
@@ -71,33 +99,84 @@
         try {
             const res = await fetch('/fixes/api');
             const fixes = await res.json();
-
-            grid.innerHTML = '';
-            fixes.forEach(fix => {
-                const card = document.createElement('div');
-                card.className = 'dx-card';
-                card.style.cursor = 'default';
-
-                // Risk Badge
-                const riskColor = fix.risk === 'Safe' ? '#22c55e' : '#f59e0b';
-
-                card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:start;">
-                    <h3>${fix.name}</h3>
-                    <span style="background:${riskColor}20; color:${riskColor}; padding:2px 8px; border-radius:12px; font-size:0.75rem; border:1px solid ${riskColor}">${fix.risk}</span>
-                </div>
-                <p>${fix.description}</p>
-                <div style="margin-top:1rem; display:flex; gap:10px;">
-                    <button onclick="openFixModal('${fix.id}')" style="background:#2563eb; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">
-                        ${fix.is_needed ? 'Fix Needed' : 'Run...'}
-                    </button>
-                </div>
-            `;
-                grid.appendChild(card);
-            });
+            window.allFixes = fixes;
+            buildCategoryTabs(fixes);
+            renderFixes(fixes, 'all');
         } catch (e) {
             grid.innerHTML = '<p style="color:red">Failed to load fixes.</p>';
         }
+    }
+
+    function buildCategoryTabs(fixes) {
+        const tabContainer = document.getElementById('category-tabs');
+        const categories = new Map();
+
+        fixes.forEach(fix => {
+            const label = fix.category_label || fix.category || 'Other';
+            const key = (fix.category || label || 'other').toLowerCase();
+            if (!categories.has(key)) {
+                categories.set(key, label);
+            }
+        });
+
+        const ordered = Array.from(categories.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+
+        tabContainer.innerHTML = '';
+        tabContainer.appendChild(createTabButton('all', 'All', true));
+        ordered.forEach(([key, label]) => {
+            tabContainer.appendChild(createTabButton(key, label, false));
+        });
+    }
+
+    function createTabButton(key, label, isActive) {
+        const button = document.createElement('button');
+        button.className = `dx-tab${isActive ? ' active' : ''}`;
+        button.textContent = label;
+        button.dataset.category = key;
+        button.addEventListener('click', () => {
+            document.querySelectorAll('.dx-tab').forEach(tab => tab.classList.remove('active'));
+            button.classList.add('active');
+            renderFixes(window.allFixes || [], key);
+        });
+        return button;
+    }
+
+    function renderFixes(fixes, categoryKey) {
+        const grid = document.getElementById('fixes-grid');
+        grid.innerHTML = '';
+
+        const filtered = categoryKey === 'all'
+            ? fixes
+            : fixes.filter(fix => (fix.category || '').toLowerCase() === categoryKey);
+
+        if (!filtered.length) {
+            grid.innerHTML = '<p style="color:#9ca3af">No fixes in this category.</p>';
+            return;
+        }
+
+        filtered.forEach(fix => {
+            const card = document.createElement('div');
+            card.className = 'dx-card';
+            card.style.cursor = 'default';
+
+            const riskLabel = fix.risk_label || fix.risk || 'Caution';
+            const riskLevel = (fix.risk_level || fix.risk || '').toLowerCase();
+            const riskColor = riskLevel === 'safe' || riskLabel === 'Safe' ? '#22c55e' : '#f59e0b';
+
+            card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:start;">
+                <h3>${fix.name}</h3>
+                <span style="background:${riskColor}20; color:${riskColor}; padding:2px 8px; border-radius:12px; font-size:0.75rem; border:1px solid ${riskColor}">${riskLabel}</span>
+            </div>
+            <p>${fix.description}</p>
+            <div style="margin-top:1rem; display:flex; gap:10px;">
+                <button onclick="openFixModal('${fix.id}')" style="background:#2563eb; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">
+                    ${fix.is_needed ? 'Fix Needed' : 'Run...'}
+                </button>
+            </div>
+        `;
+            grid.appendChild(card);
+        });
     }
 
     async function loadHistory() {
