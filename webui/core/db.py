@@ -2,7 +2,7 @@ import sqlite3
 import logging
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 
 logger = logging.getLogger(__name__)
@@ -52,9 +52,20 @@ class Database:
             error_message TEXT
         );
         """
+        create_snapshots_table = """
+        CREATE TABLE IF NOT EXISTS system_snapshots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp DATETIME NOT NULL,
+            hostname TEXT NOT NULL,
+            cpu_usage REAL,
+            memory_usage REAL,
+            disk_usage REAL
+        );
+        """
         try:
             with self.conn:
                 self.conn.execute(create_audit_log_table)
+                self.conn.execute(create_snapshots_table)
         except sqlite3.Error as e:
             logger.error(f"Failed to initialize database: {e}")
             raise
@@ -107,6 +118,50 @@ class Database:
             return [dict(row) for row in rows]
         except sqlite3.Error as e:
             logger.error(f"Failed to retrieve history: {e}")
+            return []
+
+    def log_snapshot(
+        self,
+        hostname: str,
+        cpu_usage: Optional[float],
+        memory_usage: Optional[float],
+        disk_usage: Optional[float],
+    ) -> None:
+        """Log a system snapshot for trending."""
+        try:
+            query = """
+            INSERT INTO system_snapshots (
+                timestamp, hostname, cpu_usage, memory_usage, disk_usage
+            ) VALUES (?, ?, ?, ?, ?)
+            """
+            with self.conn:
+                self.conn.execute(
+                    query,
+                    (
+                        datetime.now().isoformat(),
+                        hostname,
+                        cpu_usage,
+                        memory_usage,
+                        disk_usage,
+                    ),
+                )
+        except sqlite3.Error as e:
+            logger.error(f"Failed to write system snapshot: {e}")
+
+    def get_trend(self, metric: str, days: int = 7) -> List[Dict[str, Any]]:
+        """Get trend data for a specific metric."""
+        if metric not in ("cpu_usage", "memory_usage", "disk_usage"):
+            return []
+        cutoff = (datetime.now() - timedelta(days=days)).isoformat()
+        try:
+            cursor = self.conn.execute(
+                f"SELECT timestamp, {metric} FROM system_snapshots WHERE timestamp >= ? ORDER BY timestamp ASC",
+                (cutoff,),
+            )
+            rows = cursor.fetchall()
+            return [dict(row) for row in rows]
+        except sqlite3.Error as e:
+            logger.error(f"Failed to retrieve trend data: {e}")
             return []
 
 # Singleton instance

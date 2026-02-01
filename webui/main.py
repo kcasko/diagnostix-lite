@@ -27,6 +27,7 @@ import core.fixes.implementations.network
 import core.fixes.implementations.process
 from routers.fixes import router as fixes_router
 from routers.simple import router as simple_router
+from routers.api import router as api_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -208,6 +209,7 @@ app.mount(
 # Mount Routers
 app.include_router(fixes_router)
 app.include_router(simple_router)
+app.include_router(api_router)
 
 
 # Helper functions
