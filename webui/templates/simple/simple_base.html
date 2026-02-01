@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  :root {
+    --simple-bg: #0b0e14;
+    --simple-card: #141a24;
+    --simple-border: #243044;
+    --simple-text: #eef2f6;
+    --simple-muted: #a5b4c8;
+    --simple-accent: #7cc4ff;
+    --simple-accent-strong: #4aa9ff;
+    --simple-warn: #f4c77b;
+  }
+
+  .simple-shell {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 3rem;
+    color: var(--simple-text);
+  }
+
+  .simple-header {
+    margin-bottom: 1.75rem;
+  }
+
+  .simple-kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    font-size: 0.7rem;
+    color: var(--simple-muted);
+  }
+
+  .simple-title {
+    margin: 0.35rem 0 0.35rem;
+    font-size: 2.2rem;
+    font-weight: 600;
+  }
+
+  .simple-subtitle {
+    margin: 0;
+    color: var(--simple-muted);
+    font-size: 1rem;
+  }
+
+  .simple-step {
+    margin: 1rem 0 1.5rem;
+    color: var(--simple-muted);
+    font-size: 0.95rem;
+  }
+
+  .simple-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .simple-button {
+    width: 100%;
+    border: 1px solid var(--simple-border);
+    background: var(--simple-card);
+    color: var(--simple-text);
+    padding: 1.1rem 1.25rem;
+    border-radius: 14px;
+    font-size: 1.05rem;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+
+  .simple-button:hover {
+    border-color: var(--simple-accent-strong);
+    transform: translateY(-1px);
+  }
+
+  .simple-button.primary {
+    background: linear-gradient(135deg, #1b2a3a, #1e354d);
+    border-color: #36536f;
+  }
+
+  .simple-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .simple-note {
+    margin-top: 1rem;
+    color: var(--simple-muted);
+    font-size: 0.95rem;
+  }
+
+  .simple-warning {
+    margin-top: 1rem;
+    padding: 1rem 1.2rem;
+    border-radius: 12px;
+    background: rgba(244, 199, 123, 0.15);
+    border: 1px solid rgba(244, 199, 123, 0.4);
+    color: var(--simple-warn);
+  }
+
+  .simple-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+  }
+
+  .simple-list li {
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--simple-border);
+    background: var(--simple-card);
+    margin-bottom: 0.75rem;
+  }
+
+  .simple-status {
+    font-size: 0.9rem;
+    color: var(--simple-muted);
+  }
+
+  @media (max-width: 900px) {
+    .simple-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .simple-actions {
+      flex-direction: column;
+    }
+  }
+</style>
+
+<div class="simple-shell">
+  <div class="simple-header">
+    <div class="simple-kicker">Simple Mode</div>
+    <h1 class="simple-title">{{ heading or "Quick Fix Wizard" }}</h1>
+    <p class="simple-subtitle">{{ subtitle or "" }}</p>
+  </div>
+
+  {% block simple_content %}{% endblock %}
+</div>
+{% endblock %}

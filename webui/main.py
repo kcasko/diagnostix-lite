@@ -16,6 +16,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.background import BackgroundTask
+from starlette.middleware.sessions import SessionMiddleware
 
 # Fix Engine Imports
 from core.db import db_instance
@@ -25,6 +26,7 @@ import core.fixes.implementations.general
 import core.fixes.implementations.network
 import core.fixes.implementations.process
 from routers.fixes import router as fixes_router
+from routers.simple import router as simple_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -71,6 +73,10 @@ app = FastAPI(
     description="Cross-platform system diagnostics tool",
     lifespan=lifespan
 )
+
+# Session middleware enables wizard state tracking for Simple Mode.
+SESSION_SECRET = os.getenv("DIAGNOSTIX_SESSION_SECRET", "diagnostix-dev-secret")
+app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET)
 
 
 # Path configuration
@@ -201,6 +207,7 @@ app.mount(
 
 # Mount Routers
 app.include_router(fixes_router)
+app.include_router(simple_router)
 
 
 # Helper functions

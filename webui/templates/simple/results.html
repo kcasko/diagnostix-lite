@@ -1,0 +1,53 @@
+{% extends "simple/simple_base.html" %}
+{% set heading = "Results" %}
+{% set subtitle = "Here is what finished." %}
+
+{% block simple_content %}
+<div class="simple-step">Step 5 of 5</div>
+
+{% if total == 0 %}
+<div class="simple-warning">
+  No Simple Mode steps were available for this selection.
+</div>
+{% endif %}
+
+<h3>Completed</h3>
+{% if completed %}
+<ul class="simple-list">
+  {% for item in completed %}
+  <li>
+    <div>{{ item.label }}</div>
+    <div class="simple-status">Completed</div>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="simple-note">No completed steps.</div>
+{% endif %}
+
+<h3>Failed</h3>
+{% if failed %}
+<ul class="simple-list">
+  {% for item in failed %}
+  <li>
+    <div>{{ item.label }}</div>
+    <div class="simple-status">Could not complete</div>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="simple-note">No failed steps.</div>
+{% endif %}
+
+<div class="simple-actions">
+  <a class="simple-button primary" href="/simple/export">Export results</a>
+  <a class="simple-button" href="/simple">Start over</a>
+</div>
+
+{% if show_pro_mode %}
+<div class="simple-note">Advanced fixes may help if the issue persists.</div>
+<div class="simple-actions">
+  <a class="simple-button primary" href="/fixes">Switch to Pro Mode</a>
+</div>
+{% endif %}
+{% endblock %}

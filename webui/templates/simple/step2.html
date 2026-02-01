@@ -1,0 +1,36 @@
+{% extends "simple/simple_base.html" %}
+{% set heading = "How cautious should we be?" %}
+{% set subtitle = "Choose how much we can change to help." %}
+
+{% block simple_content %}
+<div class="simple-step">Step 2 of 5 • {{ issue_label }}</div>
+
+<div class="simple-grid">
+  <form method="post" action="/simple/step2">
+    <button class="simple-button primary" name="risk" value="safe">
+      Safe fixes only (recommended)
+    </button>
+  </form>
+
+  <form method="post" action="/simple/step2">
+    <button class="simple-button" name="risk" value="moderate">
+      Safe + moderate fixes
+    </button>
+  </form>
+</div>
+
+{% if show_warning %}
+<div class="simple-warning">
+  Moderate fixes can change settings and may require a restart. We will not run anything dangerous.
+</div>
+
+<form method="post" action="/simple/step2" class="simple-actions">
+  <input type="hidden" name="risk" value="moderate" />
+  <input type="hidden" name="confirm" value="yes" />
+  <button class="simple-button primary">Continue with Safe + Moderate</button>
+  <a class="simple-button" href="/simple/step2">Go back</a>
+</form>
+{% endif %}
+
+<div class="simple-note">You can always switch to Pro Mode later.</div>
+{% endblock %}

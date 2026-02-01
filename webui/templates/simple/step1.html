@@ -1,0 +1,19 @@
+{% extends "simple/simple_base.html" %}
+{% set heading = "What's wrong?" %}
+{% set subtitle = "Pick the closest match. We'll guide you." %}
+
+{% block simple_content %}
+<div class="simple-step">Step 1 of 5</div>
+
+<div class="simple-grid">
+  {% for option in options %}
+  <form method="post" action="/simple/step1">
+    <button class="simple-button primary" name="issue" value="{{ option.id }}">
+      {{ option.label }}
+    </button>
+  </form>
+  {% endfor %}
+</div>
+
+<div class="simple-note">No typing required.</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "simple/simple_base.html" %}
+{% set heading = "What will be done?" %}
+{% set subtitle = "Here is the plan in plain language." %}
+
+{% block simple_content %}
+<div class="simple-step">Step 3 of 5 • {{ issue_label }}</div>
+
+{% if has_actions %}
+<ul class="simple-list">
+  {% for action in actions %}
+  <li>{{ action }}</li>
+  {% endfor %}
+</ul>
+
+<form method="post" action="/simple/run" class="simple-actions">
+  <button class="simple-button primary">Run fixes</button>
+  <a class="simple-button" href="/simple/step2">Go back</a>
+</form>
+{% else %}
+<div class="simple-warning">
+  We do not have safe steps for this selection in Simple Mode.
+</div>
+
+<div class="simple-actions">
+  <a class="simple-button primary" href="/fixes">Switch to Pro Mode</a>
+  <a class="simple-button" href="/simple">Start over</a>
+</div>
+{% endif %}
+{% endblock %}

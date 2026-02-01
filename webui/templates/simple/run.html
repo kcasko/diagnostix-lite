@@ -1,0 +1,45 @@
+{% extends "simple/simple_base.html" %}
+{% set heading = "Running fixes" %}
+{% set subtitle = "We will go step by step." %}
+
+{% block simple_content %}
+<div class="simple-step">Step 4 of 5</div>
+
+<div id="progress-status" class="simple-status">Starting...</div>
+
+<ul class="simple-list">
+  {% for action in actions %}
+  <li>
+    <div>{{ action }}</div>
+    <div class="simple-status" data-status-index="{{ loop.index0 }}">Waiting</div>
+  </li>
+  {% endfor %}
+</ul>
+
+<script>
+  const total = {{ total }};
+  const statusEls = document.querySelectorAll("[data-status-index]");
+  const progressEl = document.getElementById("progress-status");
+
+  async function runNext() {
+    const response = await fetch("/simple/api/run-next", { method: "POST" });
+    const data = await response.json();
+
+    if (data.done) {
+      progressEl.textContent = "All steps finished.";
+      setTimeout(() => { window.location.href = "/simple/results"; }, 500);
+      return;
+    }
+
+    if (typeof data.index === "number" && statusEls[data.index]) {
+      statusEls[data.index].textContent = data.message || "Completed";
+    }
+
+    progressEl.textContent = `Completed ${data.index + 1} of ${total}`;
+
+    setTimeout(runNext, 200);
+  }
+
+  window.addEventListener("load", runNext);
+</script>
+{% endblock %}
