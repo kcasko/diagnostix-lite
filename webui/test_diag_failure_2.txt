@@ -1,0 +1,39 @@
+============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-9.0.2, pluggy-1.6.0
+rootdir: E:\Repos\diagnostix
+configfile: pytest.ini
+plugins: anyio-4.12.1
+collected 3 items
+
+tests\test_diagnostics.py FFF                                            [100%]
+
+================================== FAILURES ===================================
+____________________________ test_system_overview _____________________________
+
+    def test_system_overview():
+        """Smoke test for system overview."""
+>       result = system_overview.run()
+E       AttributeError: 'function' object has no attribute 'run'
+
+tests\test_diagnostics.py:15: AttributeError
+_______________________________ test_disk_usage _______________________________
+
+    def test_disk_usage():
+        """Smoke test for disk diagnostics."""
+>       result = disk_diagnostics.run()
+E       AttributeError: 'function' object has no attribute 'run'
+
+tests\test_diagnostics.py:23: AttributeError
+_______________________________ test_about_info _______________________________
+
+    def test_about_info():
+        """Smoke test for about info."""
+>       result = about_diagnostix.run()
+E       AttributeError: 'function' object has no attribute 'run'
+
+tests\test_diagnostics.py:29: AttributeError
+=========================== short test summary info ===========================
+FAILED tests\test_diagnostics.py::test_system_overview - AttributeError: 'fun...
+FAILED tests\test_diagnostics.py::test_disk_usage - AttributeError: 'function...
+FAILED tests\test_diagnostics.py::test_about_info - AttributeError: 'function...
+============================== 3 failed in 0.14s ==============================

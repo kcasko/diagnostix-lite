@@ -40,6 +40,10 @@ except ImportError as e:
     DIAGNOSTIC_FUNCTIONS = {}
     PYTHON_DIAGNOSTICS_AVAILABLE = False
 
+# Import Authentication
+from core.auth import get_current_username, log_auth_status
+from fastapi import Depends
+
 
 # Constants
 SCRIPT_TIMEOUT = 60  # seconds
@@ -60,6 +64,9 @@ async def lifespan(app: FastAPI):
         logger.info("Database initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize database: {e}")
+
+    # Check Auth Configuration
+    log_auth_status()
         
     yield
     logger.info("Shutting down DiagnOStiX")
@@ -205,9 +212,10 @@ app.mount(
 )
 
 # Mount Routers
-app.include_router(fixes_router)
-app.include_router(simple_router)
-app.include_router(api_router)
+# Protect core functionality routers
+app.include_router(fixes_router, dependencies=[Depends(get_current_username)])
+app.include_router(simple_router, dependencies=[Depends(get_current_username)])
+app.include_router(api_router, dependencies=[Depends(get_current_username)])
 
 
 # Helper functions
@@ -372,7 +380,7 @@ def cleanup_temp_file(tool_id: str) -> None:
 # API Routes
 
 @app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
+async def index(request: Request, username: str = Depends(get_current_username)):
     """Main dashboard page"""
     # Filter tools based on platform
     current_platform = platform.system()
@@ -416,7 +424,8 @@ async def list_tools():
 async def run_tool(
     tool_id: str,
     request: Request,
-    mode: str = Query("auto", pattern="^(auto|python|bash)$")
+    mode: str = Query("auto", pattern="^(auto|python|bash)$"),
+    username: str = Depends(get_current_username)
 ):
     """
     Execute a diagnostic tool
@@ -475,7 +484,7 @@ async def run_tool(
 
 
 @app.get("/download/{tool_id}", response_class=FileResponse)
-async def download_output(tool_id: str):
+async def download_output(tool_id: str, username: str = Depends(get_current_username)):
     """
     Download diagnostic output as text file
 

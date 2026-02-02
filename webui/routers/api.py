@@ -10,7 +10,8 @@ from core.fixes.registry import FixRegistry
 from core.db import db_instance
 from core.history import HistoryTracker
 from core.reports import ReportGenerator
-from core.auth import require_api_key
+from core.history import HistoryTracker
+from core.reports import ReportGenerator
 
 router = APIRouter(prefix="/api/v1", tags=["api"])
 
@@ -18,12 +19,12 @@ class RunFixRequest(BaseModel):
     params: Optional[Dict[str, Any]] = None
 
 
-@router.get("/diagnostics", dependencies=[Depends(require_api_key)])
+@router.get("/diagnostics")
 def list_diagnostics() -> List[Dict[str, str]]:
     return [{"id": key} for key in DIAGNOSTIC_FUNCTIONS.keys()]
 
 
-@router.post("/diagnostics/{tool_id}", dependencies=[Depends(require_api_key)])
+@router.post("/diagnostics/{tool_id}")
 def run_diagnostic(tool_id: str) -> Dict[str, Any]:
     func = DIAGNOSTIC_FUNCTIONS.get(tool_id)
     if not func:
@@ -32,12 +33,12 @@ def run_diagnostic(tool_id: str) -> Dict[str, Any]:
     return {"id": tool_id, "output": output}
 
 
-@router.get("/fixes", dependencies=[Depends(require_api_key)])
+@router.get("/fixes")
 def list_fixes() -> List[Dict[str, Any]]:
     return FixEngine.get_all_fix_info()
 
 
-@router.post("/fixes/{fix_id}", dependencies=[Depends(require_api_key)])
+@router.post("/fixes/{fix_id}")
 def run_fix(
     fix_id: str,
     payload: RunFixRequest = Body(default_factory=RunFixRequest),
@@ -55,17 +56,17 @@ def run_fix(
     return FixEngine.run_fix(fix_id)
 
 
-@router.get("/history", dependencies=[Depends(require_api_key)])
+@router.get("/history")
 def get_history() -> List[Dict[str, Any]]:
     return db_instance.get_history()
 
 
-@router.get("/health", dependencies=[Depends(require_api_key)])
+@router.get("/health")
 def get_health() -> Dict[str, Any]:
     return HistoryTracker.collect_snapshot()
 
 
-@router.get("/report/pdf", dependencies=[Depends(require_api_key)])
+@router.get("/report/pdf")
 def get_report_pdf(
     report_type: str = Query("health", pattern="^(diagnostic|fixes|health)$"),
     tool_id: Optional[str] = None,

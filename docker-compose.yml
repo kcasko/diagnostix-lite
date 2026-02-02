@@ -18,9 +18,12 @@ services:
       - ./webui/templates:/app/templates
     environment:
       - PYTHONUNBUFFERED=1
+      # Basic Authentication Credentials (CHANGE IN PRODUCTION)
+      - DIAGNOSTIX_USER=admin
+      - DIAGNOSTIX_PASSWORD=diagnostix
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
       interval: 30s
       timeout: 10s
       retries: 3
