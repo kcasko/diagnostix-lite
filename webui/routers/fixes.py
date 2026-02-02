@@ -1,5 +1,6 @@
+import os
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 from typing import Dict, List, Any, Optional
 from pydantic import BaseModel
@@ -8,6 +9,13 @@ from pathlib import Path
 from core.fixes.registry import FixRegistry
 from core.fixes.engine import FixEngine
 from core.db import db_instance
+
+
+# Known report file locations
+REPORT_FILES = {
+    "system_snapshot": "TaurusTech-Logs/system_info_snapshot.txt",
+    "network_adapter_diagnostics": "TaurusTech-Logs/network_adapter_dump.txt",
+}
 
 # Setup Templates (mirroring main.py logic for now)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -68,3 +76,50 @@ async def run_fix(fix_id: str, request: RunFixRequest, background_tasks: Backgro
     return result
 
 
+@router.get("/{fix_id}/report")
+async def get_fix_report(fix_id: str):
+    """Get the saved report file for a diagnostic fix."""
+    if fix_id not in REPORT_FILES:
+        raise HTTPException(status_code=404, detail="No report available for this fix")
+
+    desktop = Path(os.environ.get("USERPROFILE", "")) / "Desktop"
+    report_path = desktop / REPORT_FILES[fix_id]
+
+    if not report_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"Report not found. Run the '{fix_id}' fix first to generate it."
+        )
+
+    try:
+        content = report_path.read_text(encoding='utf-8', errors='replace')
+        return {
+            "fix_id": fix_id,
+            "file_path": str(report_path),
+            "content": content,
+            "size_bytes": report_path.stat().st_size
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading report: {str(e)}")
+
+
+@router.get("/{fix_id}/report/download")
+async def download_fix_report(fix_id: str):
+    """Download the saved report file for a diagnostic fix."""
+    if fix_id not in REPORT_FILES:
+        raise HTTPException(status_code=404, detail="No report available for this fix")
+
+    desktop = Path(os.environ.get("USERPROFILE", "")) / "Desktop"
+    report_path = desktop / REPORT_FILES[fix_id]
+
+    if not report_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"Report not found. Run the '{fix_id}' fix first to generate it."
+        )
+
+    return FileResponse(
+        path=str(report_path),
+        filename=report_path.name,
+        media_type="text/plain"
+    )

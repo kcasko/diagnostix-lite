@@ -24,6 +24,7 @@ class SystemSnapshotFix(Fix):
         self.requires_admin = False
         self.estimated_time = 30
         self.tags = ["system", "info", "snapshot", "hardware", "report"]
+        self._output_file = None
 
     def detect(self) -> bool:
         return True
@@ -31,14 +32,36 @@ class SystemSnapshotFix(Fix):
     def preview(self) -> str:
         return "Will collect comprehensive system information and save to Desktop/TaurusTech-Logs/"
 
+    def _get_output_path(self) -> Path:
+        """Get the path where the snapshot is saved."""
+        desktop = Path(os.environ.get("USERPROFILE", "")) / "Desktop"
+        return desktop / "TaurusTech-Logs" / "system_info_snapshot.txt"
+
     def run(self) -> Dict[str, Any]:
         result = script_runner.run_batch_sync("01-Quick-Scripts/system_info_snapshot.bat")
         if not result.success and not result.stdout:
             raise Exception(result.error_message or "Script execution failed")
-        return {"output": result.stdout, "execution_time": result.execution_time}
+
+        # Get the saved file path and read its contents
+        output_path = self._get_output_path()
+        file_content = ""
+        if output_path.exists():
+            try:
+                file_content = output_path.read_text(encoding='utf-8', errors='replace')
+            except Exception:
+                file_content = result.stdout
+        else:
+            file_content = result.stdout
+
+        return {
+            "output": file_content,
+            "execution_time": result.execution_time,
+            "file_path": str(output_path),
+            "file_exists": output_path.exists()
+        }
 
     def verify(self) -> bool:
-        return True
+        return self._get_output_path().exists()
 
 
 class NetworkAdapterDiagnosticsFix(Fix):
