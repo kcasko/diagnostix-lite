@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from fastapi.responses import StreamingResponse
 from typing import Dict, Any, Optional, List
 from io import BytesIO
@@ -38,7 +38,10 @@ def list_fixes() -> List[Dict[str, Any]]:
 
 
 @router.post("/fixes/{fix_id}", dependencies=[Depends(require_api_key)])
-def run_fix(fix_id: str, payload: RunFixRequest = RunFixRequest()) -> Dict[str, Any]:
+def run_fix(
+    fix_id: str,
+    payload: RunFixRequest = Body(default_factory=RunFixRequest),
+) -> Dict[str, Any]:
     fix = FixRegistry.get_fix(fix_id)
     if not fix:
         raise HTTPException(status_code=404, detail="Fix not found")

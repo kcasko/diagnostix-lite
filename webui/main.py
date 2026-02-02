@@ -21,10 +21,8 @@ from starlette.middleware.sessions import SessionMiddleware
 # Fix Engine Imports
 from core.db import db_instance
 from core.fixes.registry import FixRegistry
-# Check if internal modules must be imported to trigger registration
-import core.fixes.implementations.general
-import core.fixes.implementations.network
-import core.fixes.implementations.process
+# Import the implementations package to register all fix modules.
+import core.fixes.implementations
 from routers.fixes import router as fixes_router
 from routers.simple import router as simple_router
 from routers.api import router as api_router

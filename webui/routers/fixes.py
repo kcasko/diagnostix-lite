@@ -2,6 +2,7 @@ import os
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Request
 from fastapi.responses import HTMLResponse, FileResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
+from starlette.concurrency import run_in_threadpool
 from typing import Dict, List, Any, Optional
 from pydantic import BaseModel
 from pathlib import Path
@@ -72,7 +73,7 @@ async def run_fix(fix_id: str, request: RunFixRequest, background_tasks: Backgro
              raise HTTPException(status_code=400, detail="Invalid PID")
 
     # Run the fix via the engine
-    result = FixEngine.run_fix(fix_id)
+    result = await run_in_threadpool(FixEngine.run_fix, fix_id)
     return result
 
 

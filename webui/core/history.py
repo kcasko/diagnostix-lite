@@ -38,6 +38,11 @@ class HistoryTracker:
     def record_snapshot(metrics: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         if metrics is None:
             metrics = HistoryTracker.collect_snapshot()
+        if db_instance.conn is None:
+            try:
+                db_instance.connect()
+            except Exception:
+                return metrics
         db_instance.log_snapshot(
             hostname=metrics.get("hostname", platform.node()),
             cpu_usage=metrics.get("cpu_usage"),

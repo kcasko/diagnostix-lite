@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
+from starlette.concurrency import run_in_threadpool
 from pathlib import Path
 from typing import Dict, List, Any
 from uuid import uuid4
@@ -194,7 +195,7 @@ async def simple_step2(request: Request):
     issue = request.session.get("simple_issue")
     if not issue:
         return RedirectResponse("/simple", status_code=303)
-    selected = request.session.get("simple_risk", "safe")
+    selected = request.session.get("simple_risk_pending") or request.session.get("simple_risk", "safe")
     return templates.TemplateResponse(
         request,
         "simple/step2.html",
@@ -216,7 +217,8 @@ async def simple_step2_submit(
     if risk not in ("safe", "moderate"):
         raise HTTPException(status_code=400, detail="Invalid selection")
     if risk == "moderate" and confirm != "yes":
-        request.session["simple_risk"] = risk
+        request.session["simple_risk_pending"] = risk
+        request.session.pop("simple_risk", None)
         return templates.TemplateResponse(
             request,
             "simple/step2.html",
@@ -228,6 +230,7 @@ async def simple_step2_submit(
             },
         )
     request.session["simple_risk"] = risk
+    request.session.pop("simple_risk_pending", None)
     return RedirectResponse("/simple/step3", status_code=303)
 
 
@@ -236,7 +239,9 @@ async def simple_step3(request: Request):
     issue = request.session.get("simple_issue")
     if not issue:
         return RedirectResponse("/simple", status_code=303)
-    risk = request.session.get("simple_risk", "safe")
+    risk = request.session.get("simple_risk")
+    if not risk:
+        return RedirectResponse("/simple/step2", status_code=303)
     plan = _build_plan(issue, risk)
     request.session["simple_plan"] = plan
     actions = [_action_label_for(fix_id) for fix_id in plan]
@@ -311,7 +316,7 @@ async def simple_run_next(request: Request):
     label = state.get("labels", [])[index] if state.get("labels") else _action_label_for(fix_id)
 
     try:
-        result = FixEngine.run_fix(fix_id)
+        result = await run_in_threadpool(FixEngine.run_fix, fix_id)
     except Exception as exc:
         result = {"success": False, "message": str(exc)}
 
