@@ -2,7 +2,6 @@
 DiagnOStiX 3.0 - Process Fixes (Enhanced)
 """
 
-import asyncio
 import psutil
 from typing import Dict, Any, Optional
 
@@ -46,12 +45,10 @@ class KillProcessAdvancedFix(Fix):
     def run(self) -> Dict[str, Any]:
         if not self.target_process:
             raise ValueError("No target process specified")
-        
-        # Use the PowerShell script for interactive termination
-        result = asyncio.get_event_loop().run_until_complete(
-            script_runner.run_powershell_command(
-                f"Stop-Process -Name '{self.target_process.replace('.exe', '')}' -Force -ErrorAction SilentlyContinue"
-            )
+
+        # Use the PowerShell command for termination
+        result = script_runner.run_powershell_command_sync(
+            f"Stop-Process -Name '{self.target_process.replace('.exe', '')}' -Force -ErrorAction SilentlyContinue"
         )
         return {
             "output": result.stdout or "Process terminated",

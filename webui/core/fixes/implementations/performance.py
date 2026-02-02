@@ -2,7 +2,6 @@
 DiagnOStiX 3.0 - Performance Fixes
 """
 
-import asyncio
 from typing import Dict, Any
 
 from core.fixes.base import Fix, FixCategory, RiskLevel
@@ -37,9 +36,7 @@ class DisableBloatServicesFix(Fix):
         )
 
     def run(self) -> Dict[str, Any]:
-        result = asyncio.get_event_loop().run_until_complete(
-            script_runner.run_powershell("01-Quick-Scripts/TaurusTech_Service_Disabler.ps1")
-        )
+        result = script_runner.run_powershell_sync("01-Quick-Scripts/TaurusTech_Service_Disabler.ps1")
         if not result.success and "error" in result.stderr.lower():
             raise Exception(result.stderr)
         return {"output": result.stdout, "execution_time": result.execution_time}
@@ -76,9 +73,7 @@ class PowerPerformanceFix(Fix):
         )
 
     def run(self) -> Dict[str, Any]:
-        result = asyncio.get_event_loop().run_until_complete(
-            script_runner.run_batch("03-Config-Tweaks/PowerTweaks.bat")
-        )
+        result = script_runner.run_batch_sync("03-Config-Tweaks/PowerTweaks.bat")
         return {"output": result.stdout, "execution_time": result.execution_time}
 
     def verify(self) -> bool:

@@ -2,7 +2,6 @@
 DiagnOStiX 3.0 - Diagnostic Fixes
 """
 
-import asyncio
 import os
 from typing import Dict, Any
 from pathlib import Path
@@ -33,9 +32,7 @@ class SystemSnapshotFix(Fix):
         return "Will collect comprehensive system information and save to Desktop/TaurusTech-Logs/"
 
     def run(self) -> Dict[str, Any]:
-        result = asyncio.get_event_loop().run_until_complete(
-            script_runner.run_batch("01-Quick-Scripts/system_info_snapshot.bat")
-        )
+        result = script_runner.run_batch_sync("01-Quick-Scripts/system_info_snapshot.bat")
         if not result.success and not result.stdout:
             raise Exception(result.error_message or "Script execution failed")
         return {"output": result.stdout, "execution_time": result.execution_time}
@@ -65,9 +62,7 @@ class NetworkAdapterDiagnosticsFix(Fix):
         return "Will analyze network adapters and create detailed logs."
 
     def run(self) -> Dict[str, Any]:
-        result = asyncio.get_event_loop().run_until_complete(
-            script_runner.run_powershell("01-Quick-Scripts/network_adapter_dump.ps1")
-        )
+        result = script_runner.run_powershell_sync("01-Quick-Scripts/network_adapter_dump.ps1")
         if not result.success and not result.stdout:
             raise Exception(result.error_message or "Script execution failed")
         return {"output": result.stdout, "execution_time": result.execution_time}
@@ -98,9 +93,7 @@ class StartupAnalysisFix(Fix):
         return "Will open startup folders for review of autostart programs."
 
     def run(self) -> Dict[str, Any]:
-        result = asyncio.get_event_loop().run_until_complete(
-            script_runner.run_batch("01-Quick-Scripts/cleanup_startup.bat")
-        )
+        result = script_runner.run_batch_sync("01-Quick-Scripts/cleanup_startup.bat")
         return {"output": result.stdout}
 
     def verify(self) -> bool:

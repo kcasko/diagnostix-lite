@@ -2,7 +2,6 @@
 DiagnOStiX 3.0 - Maintenance Fixes
 """
 
-import asyncio
 import os
 import tempfile
 from typing import Dict, Any
@@ -48,9 +47,7 @@ class CleanTempAdvancedFix(Fix):
         )
 
     def run(self) -> Dict[str, Any]:
-        result = asyncio.get_event_loop().run_until_complete(
-            script_runner.run_batch("01-Quick-Scripts/clean_temp.bat")
-        )
+        result = script_runner.run_batch_sync("01-Quick-Scripts/clean_temp.bat")
         return {"output": result.stdout, "execution_time": result.execution_time}
 
     def verify(self) -> bool:

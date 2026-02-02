@@ -157,8 +157,8 @@ TOOLS: Dict[str, Dict[str, Any]] = {
     "network_speed_test": {
         "label": "Network speed test",
         "script": "network_speed_test.sh",
-        "description": "Download test file and measure throughput (bash only).",
-        "python_available": False,
+        "description": "Measure internet download and upload speeds.",
+        "python_available": True,
         "category": "network"
     },
     "quick_repair": {

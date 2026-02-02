@@ -1,11 +1,17 @@
 """
-Network Diagnostics - Interfaces, routes, DNS, and connectivity
+Network Diagnostics - Interfaces, routes, DNS, connectivity, and speed test
 """
 import psutil
 import socket
 import subprocess
 import platform
 from datetime import datetime
+
+try:
+    import speedtest
+    SPEEDTEST_AVAILABLE = True
+except ImportError:
+    SPEEDTEST_AVAILABLE = False
 
 
 def run() -> str:
@@ -85,8 +91,38 @@ def run() -> str:
         output.append(f"Connectivity test error: {e}")
     
     output.append("")
+    output.append("")
+    output.append("--- Internet Speed Test ---")
+    if SPEEDTEST_AVAILABLE:
+        try:
+            output.append("Running speed test (this may take a moment)...")
+            st = speedtest.Speedtest(secure=True)
+            st.get_best_server()
+
+            download_speed = st.download() / 1_000_000  # Convert to Mbps
+            upload_speed = st.upload() / 1_000_000  # Convert to Mbps
+            ping = st.results.ping
+            server = st.results.server
+
+            output.append(f"Server: {server['sponsor']} ({server['name']}, {server['country']})")
+            output.append(f"Ping: {ping:.2f} ms")
+            output.append(f"Download: {download_speed:.2f} Mbps")
+            output.append(f"Upload: {upload_speed:.2f} Mbps")
+        except Exception as e:
+            error_msg = str(e)
+            if "403" in error_msg:
+                output.append("Speed test blocked (HTTP 403). This often occurs when:")
+                output.append("  - Using a VPN (detected: ProtonVPN may be active)")
+                output.append("  - IP is rate-limited by speedtest.net")
+                output.append("Try disabling VPN temporarily or run: speedtest-cli --secure")
+            else:
+                output.append(f"Speed test error: {e}")
+    else:
+        output.append("speedtest-cli not installed. Run: pip install speedtest-cli")
+
+    output.append("")
     output.append("=" * 60)
     output.append(f"Report generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     output.append("=" * 60)
-    
+
     return "\n".join(output)

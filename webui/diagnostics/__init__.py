@@ -11,6 +11,7 @@ from .system_overview import run as system_overview
 from .hardware_health import run as hardware_health
 from .disk_diagnostics import run as disk_diagnostics
 from .network_diagnostics import run as network_diagnostics
+from .network_speed_test import run as network_speed_test
 from .memory_stress_test import run as memory_stress_test
 from .cpu_stress_test import run as cpu_stress_test
 from .gpu_diagnostics import run as gpu_diagnostics
@@ -22,6 +23,7 @@ DIAGNOSTIC_FUNCTIONS: Dict[str, Callable[[], str]] = {
     "hardware_health": hardware_health,
     "disk_diagnostics": disk_diagnostics,
     "network_diagnostics": network_diagnostics,
+    "network_speed_test": network_speed_test,
     "memory_stress_test": memory_stress_test,
     "cpu_stress_test": cpu_stress_test,
     "gpu_diagnostics": gpu_diagnostics,

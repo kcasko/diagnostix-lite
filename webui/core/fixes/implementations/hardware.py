@@ -2,7 +2,6 @@
 DiagnOStiX 3.0 - Hardware Fixes
 """
 
-import asyncio
 from typing import Dict, Any
 
 from core.fixes.base import Fix, FixCategory, RiskLevel
@@ -37,9 +36,7 @@ class RAMTestFix(Fix):
         )
 
     def run(self) -> Dict[str, Any]:
-        result = asyncio.get_event_loop().run_until_complete(
-            script_runner.run_batch("05-Utilities/TaurusTech-RAMTest.bat")
-        )
+        result = script_runner.run_batch_sync("05-Utilities/TaurusTech-RAMTest.bat")
         return {
             "output": result.stdout or "Memory diagnostic scheduled. Restart to begin test.",
             "requires_reboot": True

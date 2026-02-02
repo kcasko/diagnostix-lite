@@ -2,7 +2,6 @@
 DiagnOStiX 3.0 - Network Advanced Fixes
 """
 
-import asyncio
 from typing import Dict, Any
 
 from core.fixes.base import Fix, FixCategory, RiskLevel
@@ -42,9 +41,7 @@ class NetworkFullResetFix(Fix):
         )
 
     def run(self) -> Dict[str, Any]:
-        result = asyncio.get_event_loop().run_until_complete(
-            script_runner.run_powershell("01-Quick-Scripts/network_core_reset.ps1")
-        )
+        result = script_runner.run_powershell_sync("01-Quick-Scripts/network_core_reset.ps1")
         return {
             "output": result.stdout,
             "stderr": result.stderr,

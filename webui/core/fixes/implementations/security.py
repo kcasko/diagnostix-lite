@@ -2,7 +2,6 @@
 DiagnOStiX 3.0 - Security Fixes
 """
 
-import asyncio
 from typing import Dict, Any, Optional
 from pathlib import Path
 
@@ -40,11 +39,9 @@ class FileHashFix(Fix):
     def run(self) -> Dict[str, Any]:
         if not self.target_file:
             raise ValueError("No target file specified")
-        result = asyncio.get_event_loop().run_until_complete(
-            script_runner.run_powershell(
-                "05-Utilities/TaurusTech-FileHash.ps1",
-                args=[self.target_file]
-            )
+        result = script_runner.run_powershell_sync(
+            "05-Utilities/TaurusTech-FileHash.ps1",
+            args=[self.target_file]
         )
         return {"output": result.stdout, "file": self.target_file}
 
@@ -73,9 +70,7 @@ class PortScanFix(Fix):
         return "Will scan ports 1-1024 on localhost for open connections."
 
     def run(self) -> Dict[str, Any]:
-        result = asyncio.get_event_loop().run_until_complete(
-            script_runner.run_powershell("05-Utilities/TaurusTech-PortScan.ps1")
-        )
+        result = script_runner.run_powershell_sync("05-Utilities/TaurusTech-PortScan.ps1")
         return {"output": result.stdout, "execution_time": result.execution_time}
 
     def verify(self) -> bool:

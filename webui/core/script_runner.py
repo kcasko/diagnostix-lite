@@ -517,5 +517,337 @@ class ScriptRunner:
             )
 
 
+    # ========== SYNCHRONOUS VERSIONS ==========
+    # These are safe to call from within FastAPI's event loop
+
+    def run_batch_sync(
+        self,
+        script_path: str,
+        args: Optional[List[str]] = None,
+        timeout: int = 300,
+        capture_output: bool = True
+    ) -> ScriptResult:
+        """Synchronous version of run_batch for use within async contexts."""
+        import time
+        start_time = time.time()
+
+        try:
+            full_path = self.get_script_path(script_path)
+            cmd = ["cmd", "/c", str(full_path)]
+            if args:
+                cmd.extend(args)
+
+            logger.info(f"Executing batch script (sync): {full_path}")
+
+            result = subprocess.run(
+                cmd,
+                capture_output=capture_output,
+                text=True,
+                timeout=timeout,
+                cwd=str(full_path.parent)
+            )
+
+            return ScriptResult(
+                success=result.returncode == 0,
+                exit_code=result.returncode,
+                stdout=result.stdout or "",
+                stderr=result.stderr or "",
+                script_type=ScriptType.BATCH,
+                execution_time=time.time() - start_time
+            )
+
+        except subprocess.TimeoutExpired:
+            return ScriptResult(
+                success=False,
+                exit_code=-1,
+                stdout="",
+                stderr="",
+                script_type=ScriptType.BATCH,
+                execution_time=time.time() - start_time,
+                error_message=f"Script timed out after {timeout} seconds"
+            )
+        except FileNotFoundError as e:
+            return ScriptResult(
+                success=False,
+                exit_code=-1,
+                stdout="",
+                stderr="",
+                script_type=ScriptType.BATCH,
+                execution_time=time.time() - start_time,
+                error_message=str(e)
+            )
+        except Exception as e:
+            logger.error(f"Batch script execution failed: {e}")
+            return ScriptResult(
+                success=False,
+                exit_code=-1,
+                stdout="",
+                stderr=str(e),
+                script_type=ScriptType.BATCH,
+                execution_time=time.time() - start_time,
+                error_message=str(e)
+            )
+
+    def run_powershell_sync(
+        self,
+        script_path: str,
+        args: Optional[List[str]] = None,
+        timeout: int = 300,
+        capture_output: bool = True,
+        execution_policy: str = "Bypass"
+    ) -> ScriptResult:
+        """Synchronous version of run_powershell for use within async contexts."""
+        import time
+        start_time = time.time()
+
+        try:
+            full_path = self.get_script_path(script_path)
+
+            cmd = [
+                "powershell",
+                "-NoProfile",
+                "-ExecutionPolicy", execution_policy,
+                "-File", str(full_path)
+            ]
+            if args:
+                cmd.extend(args)
+
+            logger.info(f"Executing PowerShell script (sync): {full_path}")
+
+            result = subprocess.run(
+                cmd,
+                capture_output=capture_output,
+                text=True,
+                timeout=timeout,
+                cwd=str(full_path.parent)
+            )
+
+            return ScriptResult(
+                success=result.returncode == 0,
+                exit_code=result.returncode,
+                stdout=result.stdout or "",
+                stderr=result.stderr or "",
+                script_type=ScriptType.POWERSHELL,
+                execution_time=time.time() - start_time
+            )
+
+        except subprocess.TimeoutExpired:
+            return ScriptResult(
+                success=False,
+                exit_code=-1,
+                stdout="",
+                stderr="",
+                script_type=ScriptType.POWERSHELL,
+                execution_time=time.time() - start_time,
+                error_message=f"Script timed out after {timeout} seconds"
+            )
+        except FileNotFoundError as e:
+            return ScriptResult(
+                success=False,
+                exit_code=-1,
+                stdout="",
+                stderr="",
+                script_type=ScriptType.POWERSHELL,
+                execution_time=time.time() - start_time,
+                error_message=str(e)
+            )
+        except Exception as e:
+            logger.error(f"PowerShell script execution failed: {e}")
+            return ScriptResult(
+                success=False,
+                exit_code=-1,
+                stdout="",
+                stderr=str(e),
+                script_type=ScriptType.POWERSHELL,
+                execution_time=time.time() - start_time,
+                error_message=str(e)
+            )
+
+    def run_powershell_command_sync(
+        self,
+        command: str,
+        timeout: int = 60,
+        capture_output: bool = True
+    ) -> ScriptResult:
+        """Synchronous version of run_powershell_command."""
+        import time
+        start_time = time.time()
+
+        try:
+            cmd = [
+                "powershell",
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-Command", command
+            ]
+
+            logger.info(f"Executing PowerShell command (sync): {command[:50]}...")
+
+            result = subprocess.run(
+                cmd,
+                capture_output=capture_output,
+                text=True,
+                timeout=timeout
+            )
+
+            return ScriptResult(
+                success=result.returncode == 0,
+                exit_code=result.returncode,
+                stdout=result.stdout or "",
+                stderr=result.stderr or "",
+                script_type=ScriptType.POWERSHELL,
+                execution_time=time.time() - start_time
+            )
+
+        except subprocess.TimeoutExpired:
+            return ScriptResult(
+                success=False,
+                exit_code=-1,
+                stdout="",
+                stderr="",
+                script_type=ScriptType.POWERSHELL,
+                execution_time=time.time() - start_time,
+                error_message=f"Command timed out after {timeout} seconds"
+            )
+        except Exception as e:
+            logger.error(f"PowerShell command execution failed: {e}")
+            return ScriptResult(
+                success=False,
+                exit_code=-1,
+                stdout="",
+                stderr=str(e),
+                script_type=ScriptType.POWERSHELL,
+                execution_time=time.time() - start_time,
+                error_message=str(e)
+            )
+
+    def apply_registry_sync(
+        self,
+        reg_path: str,
+        backup: bool = True
+    ) -> ScriptResult:
+        """Synchronous version of apply_registry."""
+        import time
+        start_time = time.time()
+
+        if not self.is_windows:
+            return ScriptResult(
+                success=False,
+                exit_code=-1,
+                stdout="",
+                stderr="",
+                script_type=ScriptType.REGISTRY,
+                execution_time=0,
+                error_message="Registry operations only supported on Windows"
+            )
+
+        try:
+            full_path = self.get_script_path(reg_path)
+
+            backup_path = None
+            if backup:
+                backup_dir = Path(tempfile.gettempdir()) / "diagnostix_reg_backups"
+                backup_dir.mkdir(exist_ok=True)
+                backup_path = backup_dir / f"{full_path.stem}_backup_{int(time.time())}.reg"
+                logger.info(f"Registry backup would be saved to: {backup_path}")
+
+            cmd = ["reg", "import", str(full_path)]
+
+            logger.info(f"Applying registry file (sync): {full_path}")
+
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True
+            )
+
+            return ScriptResult(
+                success=result.returncode == 0,
+                exit_code=result.returncode,
+                stdout=(result.stdout or "") + (f"\nBackup saved to: {backup_path}" if backup_path else ""),
+                stderr=result.stderr or "",
+                script_type=ScriptType.REGISTRY,
+                execution_time=time.time() - start_time,
+                requires_reboot=True
+            )
+
+        except FileNotFoundError as e:
+            return ScriptResult(
+                success=False,
+                exit_code=-1,
+                stdout="",
+                stderr="",
+                script_type=ScriptType.REGISTRY,
+                execution_time=time.time() - start_time,
+                error_message=str(e)
+            )
+        except Exception as e:
+            logger.error(f"Registry import failed: {e}")
+            return ScriptResult(
+                success=False,
+                exit_code=-1,
+                stdout="",
+                stderr=str(e),
+                script_type=ScriptType.REGISTRY,
+                execution_time=time.time() - start_time,
+                error_message=str(e)
+            )
+
+    def run_cmd_sync(
+        self,
+        command: str,
+        timeout: int = 60
+    ) -> ScriptResult:
+        """Synchronous version of run_cmd."""
+        import time
+        start_time = time.time()
+
+        try:
+            if self.is_windows:
+                cmd = ["cmd", "/c", command]
+            else:
+                cmd = ["sh", "-c", command]
+
+            logger.info(f"Executing command (sync): {command[:50]}...")
+
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=timeout
+            )
+
+            return ScriptResult(
+                success=result.returncode == 0,
+                exit_code=result.returncode,
+                stdout=result.stdout or "",
+                stderr=result.stderr or "",
+                script_type=ScriptType.BATCH,
+                execution_time=time.time() - start_time
+            )
+
+        except subprocess.TimeoutExpired:
+            return ScriptResult(
+                success=False,
+                exit_code=-1,
+                stdout="",
+                stderr="",
+                script_type=ScriptType.BATCH,
+                execution_time=time.time() - start_time,
+                error_message=f"Command timed out after {timeout} seconds"
+            )
+        except Exception as e:
+            logger.error(f"Command execution failed: {e}")
+            return ScriptResult(
+                success=False,
+                exit_code=-1,
+                stdout="",
+                stderr=str(e),
+                script_type=ScriptType.BATCH,
+                execution_time=time.time() - start_time,
+                error_message=str(e)
+            )
+
+
 # Global instance
 script_runner = ScriptRunner()

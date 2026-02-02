@@ -2,7 +2,6 @@
 DiagnOStiX 3.0 - Configuration Fixes
 """
 
-import asyncio
 from typing import Dict, Any
 
 from core.fixes.base import Fix, FixCategory, RiskLevel
@@ -37,9 +36,7 @@ class RestoreContextMenuFix(Fix):
         )
 
     def run(self) -> Dict[str, Any]:
-        result = asyncio.get_event_loop().run_until_complete(
-            script_runner.apply_registry("03-Config-Tweaks/ContextMenu_old.reg")
-        )
+        result = script_runner.apply_registry_sync("03-Config-Tweaks/ContextMenu_old.reg")
         return {"output": result.stdout, "requires_reboot": True}
 
     def verify(self) -> bool:
@@ -72,9 +69,7 @@ class DisableBingSearchFix(Fix):
         )
 
     def run(self) -> Dict[str, Any]:
-        result = asyncio.get_event_loop().run_until_complete(
-            script_runner.apply_registry("03-Config-Tweaks/Disable_Bing_Search.reg")
-        )
+        result = script_runner.apply_registry_sync("03-Config-Tweaks/Disable_Bing_Search.reg")
         return {"output": result.stdout}
 
     def verify(self) -> bool:
@@ -106,9 +101,7 @@ class EnableLongPathsFix(Fix):
         )
 
     def run(self) -> Dict[str, Any]:
-        result = asyncio.get_event_loop().run_until_complete(
-            script_runner.apply_registry("03-Config-Tweaks/Enable_LongPaths.reg")
-        )
+        result = script_runner.apply_registry_sync("03-Config-Tweaks/Enable_LongPaths.reg")
         return {"output": result.stdout}
 
     def verify(self) -> bool:
