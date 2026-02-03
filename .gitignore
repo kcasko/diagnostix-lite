@@ -37,3 +37,12 @@ Thumbs.db
 *.spec
 build_log*.txt
 
+# Pytest
+pytest-cache-files-*/
+.pytest_cache/
+
+# Logs
+logs/
+
+# Test artifacts
+test_diag_*.txt
