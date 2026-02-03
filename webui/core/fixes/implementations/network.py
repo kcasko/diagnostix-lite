@@ -20,7 +20,9 @@ class RestartNetworkServicesFix(Fix):
             return "Will release/renew IP and reset Winsock catalog."
         elif platform.system() == "Linux":
             return "Will restart NetworkManager or networking service."
-        return "Unknown"
+        elif platform.system() == "Darwin":
+            return "Will turn Wi-Fi off and on to reset network."
+        return "Network restart not supported on this platform."
 
     def run(self):
         system = platform.system()
@@ -57,8 +59,29 @@ class RestartNetworkServicesFix(Fix):
                 
             return {"output": "Services restarted"}
             
+        elif system == "Darwin":
+            # macOS: Toggle Wi-Fi to reset network
+            output_log = ""
+            # Turn Wi-Fi off then on
+            res1 = subprocess.run(["networksetup", "-setairportpower", "en0", "off"], 
+                                  capture_output=True, text=True)
+            output_log += f"Wi-Fi OFF: {res1.stdout or 'OK'}\n"
+            
+            import time
+            time.sleep(1)
+            
+            res2 = subprocess.run(["networksetup", "-setairportpower", "en0", "on"], 
+                                  capture_output=True, text=True)
+            output_log += f"Wi-Fi ON: {res2.stdout or 'OK'}\n"
+            
+            # Flush DNS cache on macOS
+            res3 = subprocess.run(["dscacheutil", "-flushcache"], capture_output=True, text=True)
+            output_log += f"DNS Cache Flushed: {res3.stdout or 'OK'}\n"
+            
+            return {"output": output_log}
+            
         else:
-            raise NotImplementedError
+            return {"output": f"Network restart not supported on {system}"}
 
     def verify(self) -> bool:
         # Simple ping check?

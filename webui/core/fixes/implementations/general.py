@@ -88,8 +88,12 @@ class FlushDNSCacheFix(Fix):
             # Try systemd-resolved first
             cmd = ["resolvectl", "flush-caches"]
             # Fallbacks could be added here
+        elif system == "Darwin":
+            # macOS: dscacheutil and killall mDNSResponder
+            subprocess.run(["dscacheutil", "-flushcache"], capture_output=True)
+            cmd = ["killall", "-HUP", "mDNSResponder"]
         else:
-            raise NotImplementedError(f"Flush DNS not implemented for {system}")
+            return {"output": f"Flush DNS not supported on {system}"}
 
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
