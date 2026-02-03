@@ -28,6 +28,9 @@ class FileHashFix(Fix):
         self.estimated_time = 5
         self.tags = ["hash", "sha256", "integrity", "verify", "security"]
         self.target_file: Optional[str] = None
+        self.required_params = [
+            {"name": "file_path", "label": "File Path", "type": "text", "placeholder": "e.g. C:\\path\\to\\file.exe", "required": True}
+        ]
 
     def set_target(self, file_path: str):
         self.target_file = file_path

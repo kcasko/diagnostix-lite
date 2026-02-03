@@ -9,7 +9,7 @@ Defines the abstract base class for all fixes with:
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, TypedDict
 from enum import Enum
 import platform
 import logging
@@ -99,6 +99,15 @@ class RiskLevel(Enum):
         return self == RiskLevel.DANGEROUS
 
 
+class FixParam(TypedDict, total=False):
+    """Definition of a required parameter for a fix."""
+    name: str          # Parameter name (used as key)
+    label: str         # Human-readable label
+    type: str          # 'text', 'number', 'file'
+    placeholder: str   # Placeholder text
+    required: bool     # Whether the param is required
+
+
 class Fix(ABC):
     """
     Abstract Base Class for all DiagnOStiX fixes.
@@ -128,6 +137,9 @@ class Fix(ABC):
         # Legacy compatibility (deprecated - use risk_level instead)
         self.is_safe: bool = True
 
+        # Dynamic input parameters
+        self.required_params: List[FixParam] = []
+
     def check_platform_compatibility(self) -> bool:
         """Check if the current platform is supported."""
         current_os = platform.system().lower()
@@ -156,7 +168,8 @@ class Fix(ABC):
             "requires_reboot": self.requires_reboot,
             "estimated_time": self.estimated_time,
             "tags": self.tags,
-            "supported": self.check_platform_compatibility()
+            "supported": self.check_platform_compatibility(),
+            "required_params": self.required_params
         }
 
     @abstractmethod

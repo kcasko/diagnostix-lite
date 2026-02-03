@@ -65,12 +65,30 @@ async def run_fix(fix_id: str, request: RunFixRequest, background_tasks: Backgro
     if not fix:
         raise HTTPException(status_code=404, detail="Fix not found")
 
-    # If parameters (like PID) are needed, set them
-    if fix_id == "terminate_process" and "pid" in request.params:
-        try:
-             fix.set_target(int(request.params["pid"]))
-        except ValueError:
-             raise HTTPException(status_code=400, detail="Invalid PID")
+    # Apply parameters dynamically based on required_params
+    if hasattr(fix, 'required_params') and fix.required_params:
+        for param in fix.required_params:
+            param_name = param.get('name')
+            param_value = request.params.get(param_name)
+            
+            if param.get('required') and not param_value:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Missing required parameter: {param.get('label', param_name)}"
+                )
+            
+            if param_value and hasattr(fix, 'set_target'):
+                # Convert types as needed
+                param_type = param.get('type', 'text')
+                try:
+                    if param_type == 'number':
+                        param_value = int(param_value)
+                    fix.set_target(param_value)
+                except ValueError:
+                    raise HTTPException(
+                        status_code=400, 
+                        detail=f"Invalid value for {param.get('label', param_name)}"
+                    )
 
     # Run the fix via the engine
     result = await run_in_threadpool(FixEngine.run_fix, fix_id)

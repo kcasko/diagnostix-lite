@@ -24,6 +24,9 @@ class KillProcessAdvancedFix(Fix):
         self.estimated_time = 5
         self.tags = ["process", "kill", "terminate", "frozen", "stuck"]
         self.target_process: Optional[str] = None
+        self.required_params = [
+            {"name": "process_name", "label": "Process Name", "type": "text", "placeholder": "e.g. notepad.exe", "required": True}
+        ]
 
     def set_target(self, process_name: str):
         self.target_process = process_name

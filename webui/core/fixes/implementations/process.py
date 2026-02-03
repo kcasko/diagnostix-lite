@@ -10,6 +10,9 @@ class TerminateRunawayProcessFix(Fix):
         self.name = "Terminate Process"
         self.description = "Terminates a specific process by PID. Requires explicit selection."
         self.target_pid = None
+        self.required_params = [
+            {"name": "pid", "label": "Process ID (PID)", "type": "number", "placeholder": "e.g. 1234", "required": True}
+        ]
 
     def set_target(self, pid: int):
         """Set the target PID to kill."""
