@@ -1,15 +1,17 @@
 """
-DiagnOStiX 3.0 - Network Advanced Fixes
+DiagnOStiX 3.0 - Network Advanced Fixes (Pure Python)
 """
 
-from typing import Dict, Any
+import subprocess
+from typing import Dict, Any, List
 
 from core.fixes.base import Fix, FixCategory, RiskLevel
 from core.fixes.registry import FixRegistry
-from core.script_runner import script_runner
 
 
 class NetworkFullResetFix(Fix):
+    """Full network reset using subprocess for ipconfig/netsh commands."""
+
     def __init__(self):
         super().__init__()
         self.id = "network_full_reset"
@@ -41,12 +43,31 @@ class NetworkFullResetFix(Fix):
         )
 
     def run(self) -> Dict[str, Any]:
-        result = script_runner.run_powershell_sync("01-Quick-Scripts/network_core_reset.ps1")
-        return {
-            "output": result.stdout,
-            "stderr": result.stderr,
-            "requires_reboot": True
-        }
+        results: List[str] = []
+        commands = [
+            (["ipconfig", "/flushdns"], "Flush DNS"),
+            (["netsh", "winsock", "reset"], "Winsock Reset"),
+            (["netsh", "int", "ip", "reset"], "IP Reset"),
+            (["netsh", "advfirewall", "reset"], "Firewall Reset"),
+            (["ipconfig", "/release"], "DHCP Release"),
+            (["ipconfig", "/renew"], "DHCP Renew"),
+        ]
+
+        for cmd, desc in commands:
+            try:
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                if result.returncode == 0:
+                    results.append(f"✓ {desc}: Success")
+                else:
+                    results.append(f"⚠ {desc}: {result.stderr.strip() or 'Warning'}")
+            except subprocess.TimeoutExpired:
+                results.append(f"⚠ {desc}: Timeout")
+            except Exception as e:
+                results.append(f"✗ {desc}: {e}")
+
+        output = "\n".join(results)
+        output += "\n\nNetwork reset complete. Please restart your computer."
+        return {"output": output, "requires_reboot": True}
 
     def verify(self) -> bool:
         return True

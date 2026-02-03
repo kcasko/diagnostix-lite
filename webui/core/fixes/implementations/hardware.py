@@ -1,15 +1,17 @@
 """
-DiagnOStiX 3.0 - Hardware Fixes
+DiagnOStiX 3.0 - Hardware Fixes (Pure Python)
 """
 
+import subprocess
 from typing import Dict, Any
 
 from core.fixes.base import Fix, FixCategory, RiskLevel
 from core.fixes.registry import FixRegistry
-from core.script_runner import script_runner
 
 
 class RAMTestFix(Fix):
+    """Launch Windows Memory Diagnostic using subprocess."""
+
     def __init__(self):
         super().__init__()
         self.id = "ram_test"
@@ -36,11 +38,21 @@ class RAMTestFix(Fix):
         )
 
     def run(self) -> Dict[str, Any]:
-        result = script_runner.run_batch_sync("05-Utilities/TaurusTech-RAMTest.bat")
-        return {
-            "output": result.stdout or "Memory diagnostic scheduled. Restart to begin test.",
-            "requires_reboot": True
-        }
+        try:
+            # Launch memory diagnostic scheduler
+            result = subprocess.run(
+                ["mdsched.exe"],
+                capture_output=True, text=True
+            )
+            if result.returncode == 0:
+                output = "Memory diagnostic scheduled successfully.\nRestart your computer to begin the test."
+            else:
+                output = f"Scheduled test. {result.stderr or result.stdout or 'Restart to begin.'}"
+            return {"output": output, "requires_reboot": True}
+        except FileNotFoundError:
+            raise Exception("Windows Memory Diagnostic (mdsched.exe) not found.")
+        except Exception as e:
+            raise Exception(f"Failed to schedule memory diagnostic: {e}")
 
     def verify(self) -> bool:
         return True

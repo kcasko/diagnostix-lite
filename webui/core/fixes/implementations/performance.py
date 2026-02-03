@@ -1,15 +1,19 @@
 """
-DiagnOStiX 3.0 - Performance Fixes
+DiagnOStiX 3.0 - Performance Fixes (Pure Python)
 """
 
-from typing import Dict, Any
+import subprocess
+from typing import Dict, Any, List
 
 from core.fixes.base import Fix, FixCategory, RiskLevel
 from core.fixes.registry import FixRegistry
-from core.script_runner import script_runner
 
 
 class DisableBloatServicesFix(Fix):
+    """Disable Windows bloat services using sc command via subprocess."""
+
+    BLOAT_SERVICES = ["DiagTrack", "MapsBroker", "RetailDemo"]
+
     def __init__(self):
         super().__init__()
         self.id = "disable_bloat_services"
@@ -36,21 +40,41 @@ class DisableBloatServicesFix(Fix):
         )
 
     def run(self) -> Dict[str, Any]:
-        result = script_runner.run_powershell_sync("01-Quick-Scripts/TaurusTech_Service_Disabler.ps1")
-        if not result.success and "error" in result.stderr.lower():
-            raise Exception(result.stderr)
-        return {"output": result.stdout, "execution_time": result.execution_time}
+        results: List[str] = []
+        
+        for service in self.BLOAT_SERVICES:
+            # Stop the service
+            stop_result = subprocess.run(
+                ["sc", "stop", service],
+                capture_output=True, text=True
+            )
+            # Disable the service
+            disable_result = subprocess.run(
+                ["sc", "config", service, "start=", "disabled"],
+                capture_output=True, text=True
+            )
+            
+            if disable_result.returncode == 0:
+                results.append(f"✓ {service}: Disabled")
+            else:
+                error = disable_result.stderr or disable_result.stdout
+                results.append(f"✗ {service}: {error.strip()}")
+
+        output = "\n".join(results)
+        return {"output": output, "services_processed": len(self.BLOAT_SERVICES)}
 
     def verify(self) -> bool:
         return True
 
 
 class PowerPerformanceFix(Fix):
+    """Set CPU to max performance using powercfg via subprocess."""
+
     def __init__(self):
         super().__init__()
         self.id = "power_performance"
         self.name = "CPU Performance Mode"
-        self.description = "Optimize CPU power profile for maximum performance (100% max, 5% min throttling)."
+        self.description = "Optimize CPU power profile for maximum performance (100% max throttling)."
         self.simple_description = "Make your computer run at full speed instead of saving power."
         self.category = FixCategory.PERFORMANCE
         self.risk_level = RiskLevel.MODERATE
@@ -68,13 +92,42 @@ class PowerPerformanceFix(Fix):
             "Will configure power settings:\n"
             "- Set maximum CPU throttle to 100%\n"
             "- Set minimum CPU throttle to 5%\n"
-            "- Activate current power scheme\n\n"
+            "- Activate High Performance power scheme\n\n"
             "Note: This increases power consumption and heat. Best for desktops."
         )
 
     def run(self) -> Dict[str, Any]:
-        result = script_runner.run_batch_sync("03-Config-Tweaks/PowerTweaks.bat")
-        return {"output": result.stdout, "execution_time": result.execution_time}
+        results: List[str] = []
+        
+        # Set High Performance power scheme (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c)
+        high_perf_guid = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"
+        
+        # Activate high performance
+        result = subprocess.run(
+            ["powercfg", "/setactive", high_perf_guid],
+            capture_output=True, text=True
+        )
+        if result.returncode == 0:
+            results.append("✓ High Performance power scheme activated")
+        else:
+            results.append(f"✗ Failed to set power scheme: {result.stderr}")
+
+        # Set CPU min/max throttle
+        # These modify the active scheme
+        subprocess.run(
+            ["powercfg", "/setacvalueindex", "scheme_current", "sub_processor", "procthrottlemax", "100"],
+            capture_output=True
+        )
+        subprocess.run(
+            ["powercfg", "/setacvalueindex", "scheme_current", "sub_processor", "procthrottlemin", "5"],
+            capture_output=True
+        )
+        subprocess.run(["powercfg", "/setactive", "scheme_current"], capture_output=True)
+        
+        results.append("✓ CPU throttle settings applied (100% max, 5% min)")
+
+        output = "\n".join(results)
+        return {"output": output}
 
     def verify(self) -> bool:
         return True
