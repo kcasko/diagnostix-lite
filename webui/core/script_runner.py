@@ -22,8 +22,15 @@ from enum import Enum
 
 logger = logging.getLogger(__name__)
 
+import sys
+
 # Base path to PowerUserPack scripts
-POWERUSERPACK_DIR = Path(__file__).parent.parent.parent / "PowerUserPack-v1.0"
+if getattr(sys, 'frozen', False):
+    # Running in a PyInstaller bundle
+    POWERUSERPACK_DIR = Path(sys._MEIPASS) / "PowerUserPack"
+else:
+    # Running normally
+    POWERUSERPACK_DIR = Path(__file__).parent.parent.parent / "PowerUserPack-v1.0"
 
 
 class ScriptType(Enum):

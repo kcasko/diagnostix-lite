@@ -86,11 +86,25 @@ app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET)
 
 
 # Path configuration
-BASE_DIR = Path(__file__).resolve().parent.parent
-SCRIPTS_DIR = BASE_DIR / "scripts"
-WEBUI_DIR = BASE_DIR / "webui"
-STATIC_DIR = WEBUI_DIR / "static"
-TEMPLATES_DIR = WEBUI_DIR / "templates"
+import sys
+
+# Path configuration
+if getattr(sys, 'frozen', False):
+    # Running in a PyInstaller bundle
+    BASE_DIR = Path(sys._MEIPASS)
+    # Templates and Static are at root of bundle based on .spec/build command
+    TEMPLATES_DIR = BASE_DIR / "templates"
+    STATIC_DIR = BASE_DIR / "static"
+    # Scripts fallback might not work in frozen mode if not packed, but Python mode covers most.
+    # We map SCRIPTS_DIR to avoid crash, though bash scripts likely missing.
+    SCRIPTS_DIR = BASE_DIR / "scripts" 
+    WEBUI_DIR = BASE_DIR 
+else:
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    SCRIPTS_DIR = BASE_DIR / "scripts"
+    WEBUI_DIR = BASE_DIR / "webui"
+    STATIC_DIR = WEBUI_DIR / "static"
+    TEMPLATES_DIR = WEBUI_DIR / "templates"
 
 
 # Tool definitions with metadata
