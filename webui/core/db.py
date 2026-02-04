@@ -36,6 +36,17 @@ class Database:
             logger.error(f"Database connection failed: {e}")
             raise
 
+    def ensure_connected(self) -> bool:
+        """Ensure the database connection is available."""
+        if self.conn is not None:
+            return True
+        try:
+            self.connect()
+            return True
+        except Exception as e:
+            logger.error(f"Database unavailable: {e}")
+            return False
+
     def init_db(self):
         """Initialize the database schema."""
         create_audit_log_table = """
@@ -80,6 +91,9 @@ class Database:
                       condition_id: str = "manual",
                       error_message: Optional[str] = None):
         """Log a fix execution to the audit table."""
+        if not self.ensure_connected():
+            logger.warning("Skipping audit log: database not available")
+            return
         try:
             query = """
             INSERT INTO fix_audit_log (
@@ -104,11 +118,13 @@ class Database:
                     result,
                     error_message
                 ))
-        except sqlite3.Error as e:
+        except Exception as e:
             logger.error(f"Failed to write to audit log: {e}")
 
     def get_history(self, limit: int = 50) -> List[Dict[str, Any]]:
         """Retrieve execution history."""
+        if not self.ensure_connected():
+            return []
         try:
             cursor = self.conn.execute(
                 "SELECT * FROM fix_audit_log ORDER BY timestamp DESC LIMIT ?", 
@@ -116,7 +132,7 @@ class Database:
             )
             rows = cursor.fetchall()
             return [dict(row) for row in rows]
-        except sqlite3.Error as e:
+        except Exception as e:
             logger.error(f"Failed to retrieve history: {e}")
             return []
 
@@ -128,6 +144,8 @@ class Database:
         disk_usage: Optional[float],
     ) -> None:
         """Log a system snapshot for trending."""
+        if not self.ensure_connected():
+            return
         try:
             query = """
             INSERT INTO system_snapshots (
@@ -145,12 +163,14 @@ class Database:
                         disk_usage,
                     ),
                 )
-        except sqlite3.Error as e:
+        except Exception as e:
             logger.error(f"Failed to write system snapshot: {e}")
 
     def get_trend(self, metric: str, days: int = 7) -> List[Dict[str, Any]]:
         """Get trend data for a specific metric."""
         if metric not in ("cpu_usage", "memory_usage", "disk_usage"):
+            return []
+        if not self.ensure_connected():
             return []
         cutoff = (datetime.now() - timedelta(days=days)).isoformat()
         try:
@@ -160,7 +180,7 @@ class Database:
             )
             rows = cursor.fetchall()
             return [dict(row) for row in rows]
-        except sqlite3.Error as e:
+        except Exception as e:
             logger.error(f"Failed to retrieve trend data: {e}")
             return []
 

@@ -384,6 +384,11 @@ uvicorn main:app --port 8001
 ### Temperature sensors not showing
 Temperature monitoring requires admin/root privileges on most systems. Run with elevated permissions or use Docker.
 
+### Windows EXE elevation
+To run the packaged EXE with admin privileges:
+1. Right-click the EXE and choose "Run as administrator".
+2. To always elevate: Properties -> Compatibility -> "Run this program as an administrator".
+
 ### GPU not detected
 - Only NVIDIA GPUs are supported via GPUtil
 - Ensure NVIDIA drivers are installed

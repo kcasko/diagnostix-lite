@@ -147,11 +147,21 @@
 
         <div id="modal-confirm-area"
             style="display:none; margin-bottom:1rem; background:#450a0a; padding:1rem; border-radius:6px; border:1px solid #dc2626;">
-            <p style="color:#fca5a5; margin:0 0 0.5rem 0; font-size:0.9rem;">
-                ⚠️ This is a <strong>dangerous</strong> operation. Type <code id="confirm-word"
-                    style="background:#7f1d1d; padding:2px 6px; border-radius:3px;">CONFIRM</code> to proceed:
+            <p id="modal-confirm-text" style="color:#fca5a5; margin:0 0 0.5rem 0; font-size:0.9rem;">
+                WARNING: This action can change system settings.
             </p>
-            <input type="text" id="modal-confirm-input" class="dx-confirm-input" placeholder="Type CONFIRM">
+            <div id="modal-confirm-checkbox-wrap" style="display:none; margin-bottom:0.5rem;">
+                <label style="color:#fca5a5; font-size:0.9rem;">
+                    <input type="checkbox" id="modal-confirm-check" style="margin-right:6px;">
+                    I understand the risks and want to proceed.
+                </label>
+            </div>
+            <input type="text" id="modal-confirm-input" class="dx-confirm-input" placeholder="Type CONFIRM" style="display:none;">
+        </div>
+
+        <div id="modal-admin-area"
+            style="display:none; margin-bottom:1rem; background:#1f2937; padding:0.75rem; border-radius:6px; border:1px solid #4b5563; color:#fbbf24; font-size:0.9rem;">
+            This fix may require administrator privileges.
         </div>
 
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1.5rem;">
@@ -193,6 +203,16 @@
 
     function hideLoading() {
         document.getElementById('loading-overlay').style.display = 'none';
+    }
+
+    function escapeHtml(value) {
+        if (value === null || value === undefined) return '';
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
     async function loadFixes() {
@@ -262,14 +282,21 @@
 
             const riskLabel = fix.risk_label || fix.risk || 'Caution';
             const riskLevel = (fix.risk_level || fix.risk || '').toLowerCase();
-            const riskColor = riskLevel === 'safe' || riskLabel === 'Safe' ? '#22c55e' : '#f59e0b';
+            const riskColor = fix.risk_color || (riskLevel === 'dangerous' ? '#ef4444' : riskLevel === 'moderate' ? '#f59e0b' : '#22c55e');
+            const adminBadge = fix.requires_admin ? '<span style="background:#1f2937; color:#fbbf24; padding:2px 8px; border-radius:12px; font-size:0.75rem; border:1px solid #4b5563; margin-left:6px;">Admin</span>' : '';
+            const safeName = escapeHtml(fix.name);
+            const safeDescription = escapeHtml(fix.description);
+            const safeRiskLabel = escapeHtml(riskLabel);
 
             card.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:start;">
-                <h3>${fix.name}</h3>
-                <span style="background:${riskColor}20; color:${riskColor}; padding:2px 8px; border-radius:12px; font-size:0.75rem; border:1px solid ${riskColor}">${riskLabel}</span>
+                <h3>${safeName}</h3>
+                <div>
+                    <span style="background:${riskColor}20; color:${riskColor}; padding:2px 8px; border-radius:12px; font-size:0.75rem; border:1px solid ${riskColor}">${safeRiskLabel}</span>
+                    ${adminBadge}
+                </div>
             </div>
-            <p>${fix.description}</p>
+            <p>${safeDescription}</p>
             <div style="margin-top:1rem; display:flex; gap:10px;">
                 <button onclick="openFixModal('${fix.id}')" style="background:#2563eb; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">
                     ${fix.is_needed ? 'Fix Needed' : 'Run...'}
@@ -299,8 +326,11 @@
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = '1px solid #374151';
 
-                const statusColor = entry.result === 'success' ? '#4ade80' : '#ef4444';
+                const statusColor = entry.result === 'success' ? '#4ade80' : entry.result === 'skipped' ? '#f59e0b' : '#ef4444';
                 const date = new Date(entry.timestamp).toLocaleString();
+                const safeFixId = escapeHtml(entry.fix_id);
+                const safeResult = escapeHtml(entry.result);
+                const safeError = escapeHtml(entry.error_message || (entry.result === 'skipped' ? 'Skipped' : 'Success'));
                 const hasOutput = entry.after_state && entry.after_state !== 'None' && entry.after_state !== 'null';
                 const hasReport = reportFixes.includes(entry.fix_id) && entry.result === 'success';
 
@@ -328,9 +358,9 @@
 
                 tr.innerHTML = `
                 <td style="padding:10px;">${date}</td>
-                <td style="padding:10px;">${entry.fix_id}</td>
-                <td style="padding:10px; color:${statusColor}; font-weight:bold;">${entry.result}</td>
-                <td style="padding:10px;">${entry.error_message || 'Success'}</td>
+                <td style="padding:10px;">${safeFixId}</td>
+                <td style="padding:10px; color:${statusColor}; font-weight:bold;">${safeResult}</td>
+                <td style="padding:10px;">${safeError}</td>
                 <td style="padding:10px;">${actionsHtml}</td>
             `;
 
@@ -404,6 +434,10 @@
         document.getElementById('modal-params-area').innerHTML = '';
         document.getElementById('modal-confirm-area').style.display = 'none';
         document.getElementById('modal-confirm-input').value = '';
+        document.getElementById('modal-confirm-input').style.display = 'none';
+        document.getElementById('modal-confirm-checkbox-wrap').style.display = 'none';
+        document.getElementById('modal-confirm-check').checked = false;
+        document.getElementById('modal-admin-area').style.display = 'none';
 
         // Fetch fresh details
         try {
@@ -421,9 +455,30 @@
                 renderParamInputs(info.required_params);
             }
 
-            // Show confirmation for dangerous fixes
-            if (info.risk_level === 'dangerous') {
-                document.getElementById('modal-confirm-area').style.display = 'block';
+            // Show confirmation for moderate/dangerous fixes
+            if (info.requires_confirmation) {
+                const confirmArea = document.getElementById('modal-confirm-area');
+                const confirmText = document.getElementById('modal-confirm-text');
+                const confirmInput = document.getElementById('modal-confirm-input');
+                const confirmCheckWrap = document.getElementById('modal-confirm-checkbox-wrap');
+                const confirmCheck = document.getElementById('modal-confirm-check');
+                confirmArea.style.display = 'block';
+
+                if (info.requires_typed_confirmation) {
+                    confirmText.innerText = "WARNING: This is a dangerous operation. Type CONFIRM to proceed.";
+                    confirmInput.style.display = 'block';
+                    confirmCheckWrap.style.display = 'none';
+                    confirmCheck.checked = false;
+                } else {
+                    confirmText.innerText = "CAUTION: This action will make system changes. Confirm to proceed.";
+                    confirmInput.style.display = 'none';
+                    confirmInput.value = '';
+                    confirmCheckWrap.style.display = 'block';
+                }
+            }
+
+            if (info.requires_admin) {
+                document.getElementById('modal-admin-area').style.display = 'block';
             }
 
         } catch (e) {
@@ -469,12 +524,20 @@
     document.getElementById('btn-confirm-run').onclick = async () => {
         if (!currentFixId) return;
 
-        // Check confirmation for dangerous fixes
-        if (currentFixInfo && currentFixInfo.risk_level === 'dangerous') {
-            const confirmInput = document.getElementById('modal-confirm-input').value;
-            if (confirmInput !== 'CONFIRM') {
-                alert('Please type CONFIRM to proceed with this dangerous operation.');
-                return;
+        // Check confirmation for moderate/dangerous fixes
+        if (currentFixInfo && currentFixInfo.requires_confirmation) {
+            if (currentFixInfo.requires_typed_confirmation) {
+                const confirmInput = document.getElementById('modal-confirm-input').value;
+                if (confirmInput !== 'CONFIRM') {
+                    alert('Please type CONFIRM to proceed with this dangerous operation.');
+                    return;
+                }
+            } else {
+                const confirmCheck = document.getElementById('modal-confirm-check');
+                if (!confirmCheck.checked) {
+                    alert('Please confirm you understand the risks to proceed.');
+                    return;
+                }
             }
         }
 
@@ -511,6 +574,15 @@
             // Show status
             const statusEl = document.getElementById('status-message');
             statusEl.style.display = 'block';
+            if (!res.ok) {
+                const message = result.detail || result.message || `Request failed (${res.status})`;
+                statusEl.style.background = '#450a0a';
+                statusEl.style.border = '1px solid #dc2626';
+                statusEl.style.color = '#fca5a5';
+                statusEl.innerText = `Failed: ${message}`;
+                statusEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+            }
             if (result.success) {
                 statusEl.style.background = '#064e3b';
                 statusEl.style.border = '1px solid #059669';
