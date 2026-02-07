@@ -437,3 +437,34 @@ See [LICENSE](LICENSE) file for details.
 
 DiagnOStiX is built for technicians, sysadmins, repair shops, and
 developers who need fast, reliable system diagnostics across any platform.
+
+# DiagnOStiX Automated Workflow Setup
+
+This project is now configured for full automation:
+
+- GitHub Actions CI runs tests and triggers MCP agent evaluation on every push and pull request.
+- MCP agent evaluation step can be customized to call your local or remote MCP server for AI-driven test analysis and workflow automation.
+- Python virtual environment is managed and all dependencies are installed automatically.
+- Test discovery and execution are validated (all tests pass).
+
+## How to Customize MCP Agent Evaluation
+- Edit `.github/workflows/ci.yml` and update the `Run MCP Agent Evaluation` step with your actual MCP server endpoint or agent workflow command.
+- Example:
+  ```yaml
+  - name: Run MCP Agent Evaluation
+    run: |
+      curl -X POST http://localhost:8000/evaluate-agent --data '{"repo": "diagnostix"}'
+  ```
+- Use AI Toolkit sidebar in VS Code to build, monitor, and debug agent workflows.
+
+## Troubleshooting
+- If tests fail to run, ensure your virtual environment is active and dependencies are installed.
+- For MCP integration, ensure your server is running and accessible from the CI environment.
+
+## Next Steps
+- Monitor CI runs in GitHub for test and agent evaluation results.
+- Use AI Toolkit to further automate and enhance workflows.
+
+---
+
+For advanced automation, add more steps to the CI workflow or build custom agent workflows using AI Toolkit and MCP servers.

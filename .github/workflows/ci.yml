@@ -25,3 +25,10 @@ jobs:
         env:
           PYTHONPATH: webui
         run: pytest webui/tests -v
+
+      - name: Run MCP Agent Evaluation
+        run: |
+          echo "Trigger MCP agent evaluation for diagnostix"
+          # Example: Call MCP server endpoint or agent workflow
+          # curl -X POST http://localhost:8000/evaluate-agent --data '{"repo": "diagnostix"}'
+          # Replace with actual MCP agent evaluation command
